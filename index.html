@@ -75,8 +75,15 @@
           <a href="#lokasi" class="px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-all">Lokasi</a>
         </div>
 
-        <!-- HAMBURGER MENU & LOGOUT WRAPPER -->
+        <!-- HAMBURGER MENU, WAKTU REAL-TIME & LOGOUT WRAPPER -->
         <div class="flex items-center gap-3">
+          
+          <!-- KOMPONEN WAKTU & TANGGAL (DESKTOP) -->
+          <div class="hidden md:flex items-center gap-2 bg-slate-800/60 border border-slate-700/60 px-3.5 py-1.5 rounded-xl text-xs font-medium text-slate-300 shadow-inner">
+            <i class="fa-regular fa-clock text-brand-500"></i>
+            <span id="realtimeClock" class="font-semibold text-slate-200">--</span>
+          </div>
+
           <!-- HAMBURGER BUTTON (MOBILE) -->
           <button id="hamburgerBtn" class="lg:hidden w-10 h-10 flex flex-col justify-center items-center gap-[5px] p-2 focus:outline-none z-50" aria-label="Toggle Menu">
             <span class="line-1 w-6 h-[2px] bg-slate-200 rounded-full transition-all duration-300 ease-in-out"></span>
@@ -98,6 +105,11 @@
       <!-- CONTAINER DROPDOWN MENU MOBILE -->
       <div id="mobileMenu" class="lg:hidden absolute top-full left-0 w-full bg-slate-900/95 border-b border-slate-800 flex flex-col overflow-hidden transition-all duration-300 ease-in-out max-h-0 backdrop-blur-md">
         <div class="px-6 py-4 flex flex-col gap-3 text-center">
+          <!-- Jam di Mobile Menu -->
+          <div class="md:hidden py-2 border-b border-slate-800 text-xs text-brand-500 font-semibold flex items-center justify-center gap-2">
+            <i class="fa-regular fa-clock"></i>
+            <span id="realtimeClockMobile">--</span>
+          </div>
           <a href="#profil" class="mobile-link text-sm font-semibold text-slate-300 hover:text-brand-500 py-2 border-b border-slate-800/50">Profil</a>
           <a href="#sektor" class="mobile-link text-sm font-semibold text-slate-300 hover:text-brand-500 py-2 border-b border-slate-800/50">Sektor Unggulan</a>
           <a href="#kegiatan" class="mobile-link text-sm font-semibold text-slate-300 hover:text-brand-500 py-2 border-b border-slate-800/50">Kegiatan Tani</a>
@@ -394,11 +406,11 @@
                   <div>
                     <h5 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Telepon / WhatsApp</h5>
                     <a
-                      href="https://wa.me/6281234567890"
+                      href="https://wa.me/6289678928129"
                       target="_blank"
                       class="text-sm text-slate-200 hover:text-brand-500 transition-colors mt-1 block font-medium"
                     >
-                      +62 812-3456-7890
+                      +62 896-7892-8129
                     </a>
                   </div>
                 </div>
@@ -434,7 +446,7 @@
 
             <div class="mt-8 pt-6 border-t border-slate-700/60 space-y-3">
               <a
-                href="https://wa.me/6281234567890"
+                href="https://wa.me/6289678928129"
                 target="_blank"
                 class="w-full bg-brand-500 hover:bg-brand-600 text-slate-950 font-bold py-3.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-sm shadow-lg shadow-brand-500/10 active:scale-95"
               >
@@ -463,14 +475,14 @@
 
     <!-- TOMBOL FLOATING WHATSAPP -->
     <a
-      href="https://wa.me/6281234567890"
+      href="https://wa.me/6289678928129"
       target="_blank"
       class="fixed bottom-6 right-6 bg-brand-500 hover:bg-brand-600 text-slate-950 p-4 rounded-full shadow-2xl z-50 flex items-center justify-center transition-all hover:scale-110 active:scale-95 border border-brand-400"
       title="Hubungi Kami di WhatsApp"
     >
       <i class="fa-brands fa-whatsapp text-2xl"></i>
     </a>
-
+    
     <!-- PEMANGGILAN SCRIPT JS TERPISAH -->
     <script src="JS/main.js"></script>
   </body>

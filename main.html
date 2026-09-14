@@ -46,8 +46,45 @@
         },
       }
     </script>
+
+    <!-- 5. CUSTOM STYLE -->
+    <style>
+      #scrollProgress {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 3px;
+        width: 0%;
+        background: linear-gradient(90deg, #10b981, #34d399, #6ee7b7);
+        z-index: 100;
+        transition: width 0.1s ease-out;
+        box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+      }
+      .reveal {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.7s ease, transform 0.7s ease;
+      }
+      .reveal-active {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .tilt-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        transform-style: preserve-3d;
+        will-change: transform;
+      }
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: #0f172a; }
+      ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #059669; }
+      details summary::-webkit-details-marker { display: none; }
+    </style>
   </head>
-  <body class="bg-slate-900 text-slate-100 font-sans antialiased selection:bg-brand-500 selection:text-slate-900">
+  <body class="bg-slate-900 text-slate-100 font-sans antialiased selection:bg-brand-500 selection:text-slate-900 pb-16 lg:pb-0">
+
+    <!-- SCROLL PROGRESS BAR -->
+    <div id="scrollProgress"></div>
 
     <!-- NAVBAR -->
     <nav id="mainNav" class="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 transition-all duration-300">
@@ -68,16 +105,17 @@
 
         <!-- MENU NAVIGASI DESKTOP -->
         <div class="hidden lg:flex items-center gap-1 bg-slate-800/40 p-1.5 rounded-full border border-slate-800">
-          <a href="#profil" class="px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-all">Profil</a>
-          <a href="#sektor" class="px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-all">Sektor Unggulan</a>
-          <a href="#kegiatan" class="px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-all">Kegiatan Tani</a>
-          <a href="#faq" class="px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-all">FAQ</a>
-          <a href="#lokasi" class="px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-all">Lokasi</a>
+          <a href="#profil" class="nav-link px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-all">Profil</a>
+          <a href="#sektor" class="nav-link px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-all">Sektor Unggulan</a>
+          <a href="#kegiatan" class="nav-link px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-all">Kegiatan Tani</a>
+          <a href="#testimoni" class="nav-link px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-all">Testimoni</a>
+          <a href="#faq" class="nav-link px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-all">FAQ</a>
+          <a href="#lokasi" class="nav-link px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-all">Lokasi</a>
         </div>
 
         <!-- HAMBURGER MENU, WAKTU REAL-TIME & LOGOUT WRAPPER -->
         <div class="flex items-center gap-3">
-          
+
           <!-- KOMPONEN WAKTU & TANGGAL (DESKTOP) -->
           <div class="hidden md:flex items-center gap-2 bg-slate-800/60 border border-slate-700/60 px-3.5 py-1.5 rounded-xl text-xs font-medium text-slate-300 shadow-inner">
             <i class="fa-regular fa-clock text-brand-500"></i>
@@ -113,6 +151,7 @@
           <a href="#profil" class="mobile-link text-sm font-semibold text-slate-300 hover:text-brand-500 py-2 border-b border-slate-800/50">Profil</a>
           <a href="#sektor" class="mobile-link text-sm font-semibold text-slate-300 hover:text-brand-500 py-2 border-b border-slate-800/50">Sektor Unggulan</a>
           <a href="#kegiatan" class="mobile-link text-sm font-semibold text-slate-300 hover:text-brand-500 py-2 border-b border-slate-800/50">Kegiatan Tani</a>
+          <a href="#testimoni" class="mobile-link text-sm font-semibold text-slate-300 hover:text-brand-500 py-2 border-b border-slate-800/50">Testimoni</a>
           <a href="#faq" class="mobile-link text-sm font-semibold text-slate-300 hover:text-brand-500 py-2 border-b border-slate-800/50">FAQ</a>
           <a href="#lokasi" class="mobile-link text-sm font-semibold text-slate-300 hover:text-brand-500 py-2">Lokasi</a>
         </div>
@@ -120,24 +159,27 @@
     </nav>
 
     <!-- HERO SECTION -->
-    <section class="relative py-24 md:py-32 px-6 overflow-hidden">
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-brand-500/15 blur-[120px] rounded-full pointer-events-none"></div>
-      
+    <section id="heroSection" class="relative py-24 md:py-32 px-6 overflow-hidden">
+      <div id="heroBlob" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-brand-500/15 blur-[120px] rounded-full pointer-events-none will-change-transform"></div>
+
       <div class="max-w-4xl mx-auto text-center relative z-10">
-        <div class="inline-flex items-center gap-2 bg-brand-500/10 border border-brand-500/30 text-brand-500 text-xs px-4 py-1.5 rounded-full font-semibold uppercase tracking-widest mb-6 backdrop-blur-sm">
+        <div class="reveal inline-flex items-center gap-2 bg-brand-500/10 border border-brand-500/30 text-brand-500 text-xs px-4 py-1.5 rounded-full font-semibold uppercase tracking-widest mb-6 backdrop-blur-sm">
           <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
           Lahan & Budidaya
         </div>
 
-        <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-[1.15]">
-          Menanamkan Harapan, Membesarkan Kehidupan, dan <span class="bg-gradient-to-r from-brand-500 via-teal-300 to-emerald-400 bg-clip-text text-transparent">Mewujudkan Kemandirian</span>
+        <h1 class="reveal text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-[1.15]">
+          Menanamkan Harapan, Membesarkan Kehidupan, dan
+          <span class="bg-gradient-to-r from-brand-500 via-teal-300 to-emerald-400 bg-clip-text text-transparent">
+            <span id="typingText"></span><span class="animate-pulse">|</span>
+          </span>
         </h1>
 
-        <p class="mt-6 text-slate-400 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
+        <p class="reveal mt-6 text-slate-400 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
           Kawasan terpadu perikanan dan pertanian ramah lingkungan yang mengintegrasikan edukasi, inovasi, dan pemberdayaan masyarakat lokal.
         </p>
 
-        <div class="mt-10 flex flex-wrap justify-center gap-4">
+        <div class="reveal mt-10 flex flex-wrap justify-center gap-4">
           <a
             href="#sektor"
             class="bg-brand-500 hover:bg-brand-600 text-slate-950 font-bold px-8 py-4 rounded-xl text-sm transition-all duration-300 shadow-lg shadow-brand-500/20 hover:scale-[1.02] active:scale-95 flex items-center gap-2"
@@ -156,17 +198,33 @@
     </section>
 
     <!-- PROFIL & FOKUS -->
-    <section id="profil" class="py-24 px-6 max-w-6xl mx-auto">
+    <section id="profil" class="py-24 px-6 max-w-6xl mx-auto scroll-mt-24">
       <div class="text-center max-w-3xl mx-auto">
-        <h2 class="text-xs font-semibold uppercase tracking-widest text-brand-500 mb-3">Visi & Fokus</h2>
-        <h3 class="text-3xl md:text-4xl font-bold text-white">Mengenal Sentra Mekarmukti</h3>
-        <p class="mt-4 text-slate-400 leading-relaxed text-base">
+        <h2 class="reveal text-xs font-semibold uppercase tracking-widest text-brand-500 mb-3">Visi & Fokus</h2>
+        <h3 class="reveal text-3xl md:text-4xl font-bold text-white">Mengenal Sentra Mekarmukti</h3>
+        <p class="reveal mt-4 text-slate-400 leading-relaxed text-base">
           Sentra Mina Argo Mekarmukti adalah kawasan pengembangan perikanan, pertanian, edukasi, dan wisata alam yang dibangun untuk mendukung ketahanan pangan serta pemberdayaan masyarakat. Lebih dari sekadar tempat budidaya, kawasan ini menjadi ruang belajar, berkolaborasi, dan bertumbuh bersama menuju desa yang mandiri dan berkelanjutan.
         </p>
       </div>
 
+      <!-- COUNTER STATISTIK -->
+      <div class="reveal grid grid-cols-3 gap-6 mt-14 max-w-3xl mx-auto">
+        <div class="text-center">
+          <div class="counter text-3xl md:text-4xl font-extrabold text-brand-500" data-target="15" data-suffix="+">0</div>
+          <p class="text-xs text-slate-400 mt-1 uppercase tracking-wider">Kolam Aktif</p>
+        </div>
+        <div class="text-center">
+          <div class="counter text-3xl md:text-4xl font-extrabold text-brand-500" data-target="500" data-suffix="kg">0</div>
+          <p class="text-xs text-slate-400 mt-1 uppercase tracking-wider">Panen / Bulan</p>
+        </div>
+        <div class="text-center">
+          <div class="counter text-3xl md:text-4xl font-extrabold text-brand-500" data-target="200" data-suffix="+">0</div>
+          <p class="text-xs text-slate-400 mt-1 uppercase tracking-wider">Pengunjung</p>
+        </div>
+      </div>
+
       <div class="grid md:grid-cols-3 gap-6 mt-16">
-        <div class="p-8 bg-slate-800/40 rounded-3xl border border-slate-800 hover:border-brand-500/40 hover:bg-slate-800/70 transition-all duration-300 group">
+        <div class="reveal tilt-card p-8 bg-slate-800/40 rounded-3xl border border-slate-800 hover:border-brand-500/40 hover:bg-slate-800/70 transition-all duration-300 group">
           <div class="w-14 h-14 bg-brand-500/10 text-brand-500 rounded-2xl flex items-center justify-center mb-6 text-2xl group-hover:scale-110 group-hover:bg-brand-500 group-hover:text-slate-950 transition-all">
             <i class="fa-solid fa-water"></i>
           </div>
@@ -176,7 +234,7 @@
           </p>
         </div>
 
-        <div class="p-8 bg-slate-800/40 rounded-3xl border border-slate-800 hover:border-brand-500/40 hover:bg-slate-800/70 transition-all duration-300 group">
+        <div class="reveal tilt-card p-8 bg-slate-800/40 rounded-3xl border border-slate-800 hover:border-brand-500/40 hover:bg-slate-800/70 transition-all duration-300 group">
           <div class="w-14 h-14 bg-brand-500/10 text-brand-500 rounded-2xl flex items-center justify-center mb-6 text-2xl group-hover:scale-110 group-hover:bg-brand-500 group-hover:text-slate-950 transition-all">
             <i class="fa-solid fa-seedling"></i>
           </div>
@@ -186,7 +244,7 @@
           </p>
         </div>
 
-        <div class="p-8 bg-slate-800/40 rounded-3xl border border-slate-800 hover:border-brand-500/40 hover:bg-slate-800/70 transition-all duration-300 group">
+        <div class="reveal tilt-card p-8 bg-slate-800/40 rounded-3xl border border-slate-800 hover:border-brand-500/40 hover:bg-slate-800/70 transition-all duration-300 group">
           <div class="w-14 h-14 bg-brand-500/10 text-brand-500 rounded-2xl flex items-center justify-center mb-6 text-2xl group-hover:scale-110 group-hover:bg-brand-500 group-hover:text-slate-950 transition-all">
             <i class="fa-solid fa-graduation-cap"></i>
           </div>
@@ -199,15 +257,15 @@
     </section>
 
     <!-- SEKTOR UNGGULAN -->
-    <section id="sektor" class="py-24 bg-slate-950/60 border-y border-slate-800 px-6 relative">
+    <section id="sektor" class="py-24 bg-slate-950/60 border-y border-slate-800 px-6 relative scroll-mt-24">
       <div class="max-w-6xl mx-auto">
         <div class="text-center max-w-2xl mx-auto mb-16">
-          <h2 class="text-xs font-semibold uppercase tracking-widest text-brand-500 mb-3">Kategori Unggulan</h2>
-          <h3 class="text-3xl md:text-4xl font-bold text-white">Fokus Sektor Utama</h3>
+          <h2 class="reveal text-xs font-semibold uppercase tracking-widest text-brand-500 mb-3">Kategori Unggulan</h2>
+          <h3 class="reveal text-3xl md:text-4xl font-bold text-white">Fokus Sektor Utama</h3>
         </div>
 
         <div class="grid md:grid-cols-2 gap-8">
-          <div class="bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 hover:border-slate-700 transition duration-300 group flex flex-col">
+          <div class="reveal bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 hover:border-slate-700 transition duration-300 group flex flex-col">
             <div class="overflow-hidden h-64 relative">
               <img
                 src="Assets/areaIkan.jpeg"
@@ -231,7 +289,7 @@
             </div>
           </div>
 
-          <div class="bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 hover:border-slate-700 transition duration-300 group flex flex-col">
+          <div class="reveal bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 hover:border-slate-700 transition duration-300 group flex flex-col">
             <div class="overflow-hidden h-64 relative">
               <img
                 src="Assets/Tanaman.jpg"
@@ -259,64 +317,135 @@
     </section>
 
     <!-- GALERI KEGIATAN -->
-    <section id="kegiatan" class="py-24 px-6 max-w-6xl mx-auto">
+    <section id="kegiatan" class="py-24 px-6 max-w-6xl mx-auto scroll-mt-24">
       <div class="text-center max-w-2xl mx-auto mb-16">
-        <h2 class="text-xs font-semibold uppercase tracking-widest text-brand-500 mb-3">Dokumentasi</h2>
-        <h3 class="text-3xl md:text-4xl font-bold text-white">Kegiatan & Edukasi Lapangan</h3>
+        <h2 class="reveal text-xs font-semibold uppercase tracking-widest text-brand-500 mb-3">Dokumentasi</h2>
+        <h3 class="reveal text-3xl md:text-4xl font-bold text-white">Kegiatan & Edukasi Lapangan</h3>
       </div>
 
       <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
-        <div class="overflow-hidden rounded-2xl border border-slate-800 group relative aspect-[4/5]">
+        <div class="reveal gallery-item cursor-pointer overflow-hidden rounded-2xl border border-slate-800 group relative aspect-[4/5]">
           <img
             src="Assets/IMG_20260730_135710.jpg"
             alt="Kegiatan 1"
             class="w-full h-full object-cover group-hover:scale-110 transition duration-500"
           />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+            <i class="fa-solid fa-magnifying-glass-plus text-3xl text-brand-500"></i>
+          </div>
         </div>
 
-        <div class="overflow-hidden rounded-2xl border border-slate-800 group relative aspect-[4/5]">
+        <div class="reveal gallery-item cursor-pointer overflow-hidden rounded-2xl border border-slate-800 group relative aspect-[4/5]">
           <img
             src="Assets/IMG_20260730_135724.jpg"
             alt="Kegiatan 2"
             class="w-full h-full object-cover group-hover:scale-110 transition duration-500"
           />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+            <i class="fa-solid fa-magnifying-glass-plus text-3xl text-brand-500"></i>
+          </div>
         </div>
 
-        <div class="overflow-hidden rounded-2xl border border-slate-800 group relative aspect-[4/5]">
+        <div class="reveal gallery-item cursor-pointer overflow-hidden rounded-2xl border border-slate-800 group relative aspect-[4/5]">
           <img
             src="Assets/kegiatan.png"
             alt="Kegiatan 3"
             class="w-full h-full object-cover group-hover:scale-110 transition duration-500"
           />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+            <i class="fa-solid fa-magnifying-glass-plus text-3xl text-brand-500"></i>
+          </div>
         </div>
 
-        <div class="overflow-hidden rounded-2xl border border-slate-800 group relative aspect-[4/5]">
+        <div class="reveal gallery-item cursor-pointer overflow-hidden rounded-2xl border border-slate-800 group relative aspect-[4/5]">
           <img
             src="Assets/IMG_20260730_135734.jpg"
             alt="Kegiatan 4"
             class="w-full h-full object-cover group-hover:scale-110 transition duration-500"
           />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div class="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+            <i class="fa-solid fa-magnifying-glass-plus text-3xl text-brand-500"></i>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TESTIMONI -->
+    <section id="testimoni" class="py-24 px-6 bg-slate-950/60 border-y border-slate-800 scroll-mt-24">
+      <div class="max-w-5xl mx-auto">
+        <div class="text-center max-w-2xl mx-auto mb-14">
+          <h2 class="reveal text-xs font-semibold uppercase tracking-widest text-brand-500 mb-3">Kata Mereka</h2>
+          <h3 class="reveal text-3xl md:text-4xl font-bold text-white">Testimoni Pengunjung</h3>
+        </div>
+
+        <div class="reveal relative bg-slate-800/40 border border-slate-800 rounded-3xl p-8 md:p-12 min-h-[300px] overflow-hidden">
+          <i class="fa-solid fa-quote-left absolute top-6 left-6 text-6xl text-brand-500/10 pointer-events-none"></i>
+
+          <!-- Slide 1 -->
+          <div class="testi-slide transition-all duration-500 absolute inset-0 p-8 md:p-12 flex flex-col justify-center">
+            <p class="text-slate-200 text-lg md:text-xl leading-relaxed italic relative z-10">
+              "Tempat yang luar biasa untuk belajar budidaya ikan langsung dari ahlinya. Anak-anak saya sangat antusias!"
+            </p>
+            <div class="mt-6 flex items-center gap-3">
+              <div class="w-11 h-11 rounded-full bg-brand-500 flex items-center justify-center font-bold text-slate-950">AS</div>
+              <div>
+                <p class="font-bold text-white text-sm">Ahmad Suryadi</p>
+                <p class="text-xs text-slate-400">Guru SMAN 1 Cikarang</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 2 -->
+          <div class="testi-slide opacity-0 pointer-events-none translate-x-4 transition-all duration-500 absolute inset-0 p-8 md:p-12 flex flex-col justify-center">
+            <p class="text-slate-200 text-lg md:text-xl leading-relaxed italic relative z-10">
+              "Hasil panen ikan di sini selalu segar dan kualitasnya konsisten. Sudah jadi langganan kami setiap bulan."
+            </p>
+            <div class="mt-6 flex items-center gap-3">
+              <div class="w-11 h-11 rounded-full bg-brand-500 flex items-center justify-center font-bold text-slate-950">RW</div>
+              <div>
+                <p class="font-bold text-white text-sm">Rina Wulandari</p>
+                <p class="text-xs text-slate-400">Pemilik Warung Seafood</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slide 3 -->
+          <div class="testi-slide opacity-0 pointer-events-none translate-x-4 transition-all duration-500 absolute inset-0 p-8 md:p-12 flex flex-col justify-center">
+            <p class="text-slate-200 text-lg md:text-xl leading-relaxed italic relative z-10">
+              "Konsep pertanian terpadunya sangat inspiratif. Banyak ilmu yang bisa kami adopsi untuk desa kami."
+            </p>
+            <div class="mt-6 flex items-center gap-3">
+              <div class="w-11 h-11 rounded-full bg-brand-500 flex items-center justify-center font-bold text-slate-950">BH</div>
+              <div>
+                <p class="font-bold text-white text-sm">Budi Hartono</p>
+                <p class="text-xs text-slate-400">Ketua Kelompok Tani Bekasi</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dots -->
+          <div class="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
+            <button class="testi-dot w-8 h-2 bg-brand-500 rounded-full transition-all duration-300" aria-label="Slide 1"></button>
+            <button class="testi-dot w-2 h-2 bg-slate-600 rounded-full transition-all duration-300" aria-label="Slide 2"></button>
+            <button class="testi-dot w-2 h-2 bg-slate-600 rounded-full transition-all duration-300" aria-label="Slide 3"></button>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- SECTION FAQ ACCORDION -->
-    <section id="faq" class="py-24 bg-slate-950/60 border-t border-slate-800 px-6">
+    <section id="faq" class="py-24 bg-slate-950/60 border-t border-slate-800 px-6 scroll-mt-24">
       <div class="max-w-4xl mx-auto">
         <div class="text-center max-w-2xl mx-auto mb-16">
-          <h2 class="text-xs font-semibold uppercase tracking-widest text-brand-500 mb-3">Informasi Tambahan</h2>
-          <h3 class="text-3xl md:text-4xl font-bold text-white">Pertanyaan Umum (FAQ)</h3>
-          <p class="text-slate-400 text-sm mt-2">
+          <h2 class="reveal text-xs font-semibold uppercase tracking-widest text-brand-500 mb-3">Informasi Tambahan</h2>
+          <h3 class="reveal text-3xl md:text-4xl font-bold text-white">Pertanyaan Umum (FAQ)</h3>
+          <p class="reveal text-slate-400 text-sm mt-2">
             Hal-hal yang sering ditanyakan mengenai kawasan Sentra Mekarmukti
           </p>
         </div>
 
         <div class="space-y-4">
-          <details class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 group cursor-pointer transition-all">
+          <details class="reveal bg-slate-900/80 p-6 rounded-2xl border border-slate-800 group cursor-pointer transition-all">
             <summary class="font-bold text-white flex justify-between items-center list-none text-base">
               <span>Apakah lokasi ini menerima kunjungan studi banding / edukasi?</span>
               <span class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 group-open:bg-brand-500 group-open:text-slate-950 group-open:rotate-180 transition-all">
@@ -327,8 +456,8 @@
               Ya, kami sangat terbuka untuk kunjungan lapangan dari sekolah, instansi, maupun kelompok tani untuk belajar bersama seputar budidaya ikan dan pertanian terpadu.
             </p>
           </details>
-          
-          <details class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 group cursor-pointer transition-all">
+
+          <details class="reveal bg-slate-900/80 p-6 rounded-2xl border border-slate-800 group cursor-pointer transition-all">
             <summary class="font-bold text-white flex justify-between items-center list-none text-base">
               <span>Bagaimana cara memesan atau membeli hasil panen ikan?</span>
               <span class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 group-open:bg-brand-500 group-open:text-slate-950 group-open:rotate-180 transition-all">
@@ -340,7 +469,7 @@
             </p>
           </details>
 
-          <details class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 group cursor-pointer transition-all">
+          <details class="reveal bg-slate-900/80 p-6 rounded-2xl border border-slate-800 group cursor-pointer transition-all">
             <summary class="font-bold text-white flex justify-between items-center list-none text-base">
               <span>Kapan jam operasional kunjungan lokasi?</span>
               <span class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 group-open:bg-brand-500 group-open:text-slate-950 group-open:rotate-180 transition-all">
@@ -356,18 +485,18 @@
     </section>
 
     <!-- SECTION LOKASI & KONTAK -->
-    <section id="lokasi" class="py-24 px-6 bg-slate-900">
+    <section id="lokasi" class="py-24 px-6 bg-slate-900 scroll-mt-24">
       <div class="max-w-6xl mx-auto">
         <div class="text-center max-w-2xl mx-auto mb-16">
-          <h2 class="text-xs font-semibold uppercase tracking-widest text-brand-500 mb-3">Kontak & Navigasi</h2>
-          <h3 class="text-3xl md:text-4xl font-bold text-white">Lokasi & Informasi Kontak</h3>
-          <p class="text-slate-400 text-sm mt-2">
+          <h2 class="reveal text-xs font-semibold uppercase tracking-widest text-brand-500 mb-3">Kontak & Navigasi</h2>
+          <h3 class="reveal text-3xl md:text-4xl font-bold text-white">Lokasi & Informasi Kontak</h3>
+          <p class="reveal text-slate-400 text-sm mt-2">
             Silakan datang langsung atau hubungi kami untuk informasi pemesanan hasil panen, konsultasi, dan kunjungan edukasi.
           </p>
         </div>
 
         <div class="grid lg:grid-cols-12 gap-8 items-stretch">
-          <div class="lg:col-span-7 bg-slate-800 rounded-3xl overflow-hidden shadow-2xl h-[380px] lg:h-auto border border-slate-700/60 relative">
+          <div class="reveal lg:col-span-7 bg-slate-800 rounded-3xl overflow-hidden shadow-2xl h-[380px] lg:h-auto border border-slate-700/60 relative">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d686.7913708945017!2d107.16292639518196!3d-6.285686848961626!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e698500284e87bb%3A0x2b3f4a3702bd790!2sSentra%20Mina%20Argo%20Mekarmukti!5e1!3m2!1sid!2sid!4v1785394348468!5m2!1sid!2sid"
               width="100%"
@@ -380,7 +509,7 @@
             </iframe>
           </div>
 
-          <div class="lg:col-span-5 bg-gradient-to-br from-slate-800 to-slate-800/40 border border-slate-700/60 text-white rounded-3xl p-8 flex flex-col justify-between shadow-2xl backdrop-blur-sm">
+          <div class="reveal lg:col-span-5 bg-gradient-to-br from-slate-800 to-slate-800/40 border border-slate-700/60 text-white rounded-3xl p-8 flex flex-col justify-between shadow-2xl backdrop-blur-sm">
             <div>
               <h4 class="text-xl font-bold mb-6 text-brand-500 border-b border-slate-700/60 pb-4">
                 Hubungi Kami
@@ -477,12 +606,70 @@
     <a
       href="https://wa.me/6289678928129"
       target="_blank"
-      class="fixed bottom-6 right-6 bg-brand-500 hover:bg-brand-600 text-slate-950 p-4 rounded-full shadow-2xl z-50 flex items-center justify-center transition-all hover:scale-110 active:scale-95 border border-brand-400"
+      class="fixed bottom-20 lg:bottom-6 right-6 bg-brand-500 hover:bg-brand-600 text-slate-950 p-4 rounded-full shadow-2xl z-50 flex items-center justify-center transition-all hover:scale-110 active:scale-95 border border-brand-400"
       title="Hubungi Kami di WhatsApp"
     >
       <i class="fa-brands fa-whatsapp text-2xl"></i>
     </a>
-    
+
+    <!-- BACK TO TOP -->
+    <button
+      id="backToTop"
+      class="fixed bottom-36 lg:bottom-24 right-6 bg-slate-800 hover:bg-brand-500 text-brand-500 hover:text-slate-950 p-3.5 rounded-full shadow-2xl z-40 border border-slate-700 hover:border-brand-500 transition-all duration-300 opacity-0 pointer-events-none translate-y-4"
+      title="Kembali ke atas"
+    >
+      <i class="fa-solid fa-arrow-up"></i>
+    </button>
+
+    <!-- LIGHTBOX GALLERY -->
+    <div
+      id="lightbox"
+      class="hidden fixed inset-0 z-[60] bg-slate-950/90 backdrop-blur-md items-center justify-center p-4 opacity-0 transition-opacity duration-300"
+    >
+      <button
+        id="lightboxClose"
+        class="absolute top-6 right-6 w-11 h-11 bg-slate-800 hover:bg-brand-500 text-slate-200 hover:text-slate-950 rounded-full flex items-center justify-center transition-all border border-slate-700"
+        aria-label="Tutup"
+      >
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+      <img
+        id="lightboxImg"
+        src=""
+        alt=""
+        class="max-w-[90vw] max-h-[85vh] rounded-2xl border border-slate-700 shadow-2xl transition-transform duration-300 scale-90"
+      />
+    </div>
+
+    <!-- MOBILE BOTTOM NAV -->
+    <nav
+      id="bottomNav"
+      class="lg:hidden fixed bottom-0 left-0 w-full bg-slate-900/95 backdrop-blur-md border-t border-slate-800 z-40 transition-transform duration-300"
+    >
+      <div class="grid grid-cols-5 py-2">
+        <a href="#heroSection" class="flex flex-col items-center gap-1 py-1.5 text-slate-400 hover:text-brand-500 transition-colors">
+          <i class="fa-solid fa-house text-base"></i>
+          <span class="text-[10px] font-medium">Home</span>
+        </a>
+        <a href="#profil" class="flex flex-col items-center gap-1 py-1.5 text-slate-400 hover:text-brand-500 transition-colors">
+          <i class="fa-solid fa-circle-info text-base"></i>
+          <span class="text-[10px] font-medium">Profil</span>
+        </a>
+        <a href="#sektor" class="flex flex-col items-center gap-1 py-1.5 text-slate-400 hover:text-brand-500 transition-colors">
+          <i class="fa-solid fa-layer-group text-base"></i>
+          <span class="text-[10px] font-medium">Sektor</span>
+        </a>
+        <a href="#kegiatan" class="flex flex-col items-center gap-1 py-1.5 text-slate-400 hover:text-brand-500 transition-colors">
+          <i class="fa-solid fa-image text-base"></i>
+          <span class="text-[10px] font-medium">Galeri</span>
+        </a>
+        <a href="#lokasi" class="flex flex-col items-center gap-1 py-1.5 text-slate-400 hover:text-brand-500 transition-colors">
+          <i class="fa-solid fa-location-dot text-base"></i>
+          <span class="text-[10px] font-medium">Lokasi</span>
+        </a>
+      </div>
+    </nav>
+
     <!-- PEMANGGILAN SCRIPT JS TERPISAH -->
     <script src="JS/main.js"></script>
   </body>

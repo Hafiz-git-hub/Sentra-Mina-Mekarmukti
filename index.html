@@ -1,489 +1,83 @@
-<!doctype html>
-<html lang="id" class="scroll-smooth">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Akses Masuk - Sentra Mina Argo Mekarmukti</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="CSS/form.css">
+</head>
 
-    <!-- FAVICON -->
-    <link rel="icon" type="image/png" href="Assets/Logo.png" />
-    <title>Sentra Mina Argo Mekarmukti</title>
-
-    <!-- 1. Google Fonts: Plus Jakarta Sans -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- 2. FontAwesome Icon -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
-
-    <!-- 3. Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <!-- 4. Konfigurasi Tailwind Custom -->
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Plus Jakarta Sans', 'sans-serif'],
-            },
-            colors: {
-              brand: {
-                50: '#ecfdf5',
-                100: '#d1fae5',
-                500: '#10b981',
-                600: '#059669',
-                700: '#047857',
-                800: '#065f46',
-                900: '#064e3b',
-                950: '#022c22',
-              }
-            }
-          },
-        },
-      }
-    </script>
-  </head>
-  <body class="bg-slate-900 text-slate-100 font-sans antialiased selection:bg-brand-500 selection:text-slate-900">
-
-    <!-- NAVBAR -->
-    <nav id="mainNav" class="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 transition-all duration-300">
-      <div class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
-        <!-- LOGO -->
-        <a href="#" class="flex items-center gap-3 group">
-          <div class="p-1.5 bg-slate-800/80 rounded-xl border border-slate-700/60 group-hover:border-brand-500/50 transition duration-300">
-            <img
-              src="Assets/Logo.png"
-              alt="Logo Sentra Mina Argo"
-              class="h-8 w-auto object-contain transition-transform duration-300 group-hover:scale-110"
-            />
-          </div>
-          <span class="text-base md:text-lg font-bold tracking-tight text-white group-hover:text-brand-500 transition-colors">
-            Sentra Mina Argo Mekarmukti
-          </span>
-        </a>
-
-        <!-- MENU NAVIGASI DESKTOP -->
-        <div class="hidden lg:flex items-center gap-1 bg-slate-800/40 p-1.5 rounded-full border border-slate-800">
-          <a href="#profil" class="px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-all">Profil</a>
-          <a href="#sektor" class="px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-all">Sektor Unggulan</a>
-          <a href="#kegiatan" class="px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-all">Kegiatan Tani</a>
-          <a href="#faq" class="px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-all">FAQ</a>
-          <a href="#lokasi" class="px-5 py-2 text-xs font-semibold text-slate-300 hover:text-white rounded-full hover:bg-slate-800 transition-all">Lokasi</a>
-        </div>
-
-        <!-- HAMBURGER MENU, WAKTU REAL-TIME & LOGOUT WRAPPER -->
-        <div class="flex items-center gap-3">
-          
-          <!-- KOMPONEN WAKTU & TANGGAL (DESKTOP) -->
-          <div class="hidden md:flex items-center gap-2 bg-slate-800/60 border border-slate-700/60 px-3.5 py-1.5 rounded-xl text-xs font-medium text-slate-300 shadow-inner">
-            <i class="fa-regular fa-clock text-brand-500"></i>
-            <span id="realtimeClock" class="font-semibold text-slate-200">--</span>
-          </div>
-
-          <!-- HAMBURGER BUTTON (MOBILE) -->
-          <button id="hamburgerBtn" class="lg:hidden w-10 h-10 flex flex-col justify-center items-center gap-[5px] p-2 focus:outline-none z-50" aria-label="Toggle Menu">
-            <span class="line-1 w-6 h-[2px] bg-slate-200 rounded-full transition-all duration-300 ease-in-out"></span>
-            <span class="line-2 w-6 h-[2px] bg-slate-200 rounded-full transition-all duration-300 ease-in-out"></span>
-            <span class="line-3 w-6 h-[2px] bg-slate-200 rounded-full transition-all duration-300 ease-in-out"></span>
-          </button>
-
-          <!-- TOMBOL LOGOUT -->
-          <a
-            href="form.html"
-            class="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 text-xs px-4 py-2.5 rounded-xl font-semibold transition-all flex items-center gap-2 hover:border-rose-500/40 active:scale-95"
-          >
-            <i class="fa-solid fa-right-from-bracket"></i>
-            <span class="hidden sm:inline">Keluar</span>
-          </a>
-        </div>
-      </div>
-
-      <!-- CONTAINER DROPDOWN MENU MOBILE -->
-      <div id="mobileMenu" class="lg:hidden absolute top-full left-0 w-full bg-slate-900/95 border-b border-slate-800 flex flex-col overflow-hidden transition-all duration-300 ease-in-out max-h-0 backdrop-blur-md">
-        <div class="px-6 py-4 flex flex-col gap-3 text-center">
-          <!-- Jam di Mobile Menu -->
-          <div class="md:hidden py-2 border-b border-slate-800 text-xs text-brand-500 font-semibold flex items-center justify-center gap-2">
-            <i class="fa-regular fa-clock"></i>
-            <span id="realtimeClockMobile">--</span>
-          </div>
-          <a href="#profil" class="mobile-link text-sm font-semibold text-slate-300 hover:text-brand-500 py-2 border-b border-slate-800/50">Profil</a>
-          <a href="#sektor" class="mobile-link text-sm font-semibold text-slate-300 hover:text-brand-500 py-2 border-b border-slate-800/50">Sektor Unggulan</a>
-          <a href="#kegiatan" class="mobile-link text-sm font-semibold text-slate-300 hover:text-brand-500 py-2 border-b border-slate-800/50">Kegiatan Tani</a>
-          <a href="#faq" class="mobile-link text-sm font-semibold text-slate-300 hover:text-brand-500 py-2 border-b border-slate-800/50">FAQ</a>
-          <a href="#lokasi" class="mobile-link text-sm font-semibold text-slate-300 hover:text-brand-500 py-2">Lokasi</a>
-        </div>
-      </div>
-    </nav>
-
-    <!-- HERO SECTION -->
-    <section class="relative py-24 md:py-32 px-6 overflow-hidden">
-      <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-brand-500/15 blur-[120px] rounded-full pointer-events-none"></div>
-      
-      <div class="max-w-4xl mx-auto text-center relative z-10">
-        <div class="inline-flex items-center gap-2 bg-brand-500/10 border border-brand-500/30 text-brand-500 text-xs px-4 py-1.5 rounded-full font-semibold uppercase tracking-widest mb-6 backdrop-blur-sm">
-          <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
-          Lahan & Budidaya
-        </div>
-
-        <h1 class="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-[1.15]">
-          Menanamkan Harapan, Membesarkan Kehidupan, dan <span class="bg-gradient-to-r from-brand-500 via-teal-300 to-emerald-400 bg-clip-text text-transparent">Mewujudkan Kemandirian</span>
-        </h1>
-
-        <p class="mt-6 text-slate-400 text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
-          Kawasan terpadu perikanan dan pertanian ramah lingkungan yang mengintegrasikan edukasi, inovasi, dan pemberdayaan masyarakat lokal.
-        </p>
-
-        <div class="mt-10 flex flex-wrap justify-center gap-4">
-          <a
-            href="#sektor"
-            class="bg-brand-500 hover:bg-brand-600 text-slate-950 font-bold px-8 py-4 rounded-xl text-sm transition-all duration-300 shadow-lg shadow-brand-500/20 hover:scale-[1.02] active:scale-95 flex items-center gap-2"
-          >
-            <span>Jelajahi Sektor</span>
-            <i class="fa-solid fa-arrow-right text-xs"></i>
-          </a>
-          <a
-            href="#profil"
-            class="bg-slate-800/80 hover:bg-slate-800 text-slate-200 font-semibold px-8 py-4 rounded-xl text-sm border border-slate-700 transition-all duration-300 hover:scale-[1.02] active:scale-95"
-          >
-            Pelajari Lebih Lanjut
-          </a>
-        </div>
-      </div>
-    </section>
-
-    <!-- PROFIL & FOKUS -->
-    <section id="profil" class="py-24 px-6 max-w-6xl mx-auto">
-      <div class="text-center max-w-3xl mx-auto">
-        <h2 class="text-xs font-semibold uppercase tracking-widest text-brand-500 mb-3">Visi & Fokus</h2>
-        <h3 class="text-3xl md:text-4xl font-bold text-white">Mengenal Sentra Mekarmukti</h3>
-        <p class="mt-4 text-slate-400 leading-relaxed text-base">
-          Sentra Mina Argo Mekarmukti adalah kawasan pengembangan perikanan, pertanian, edukasi, dan wisata alam yang dibangun untuk mendukung ketahanan pangan serta pemberdayaan masyarakat. Lebih dari sekadar tempat budidaya, kawasan ini menjadi ruang belajar, berkolaborasi, dan bertumbuh bersama menuju desa yang mandiri dan berkelanjutan.
-        </p>
-      </div>
-
-      <div class="grid md:grid-cols-3 gap-6 mt-16">
-        <div class="p-8 bg-slate-800/40 rounded-3xl border border-slate-800 hover:border-brand-500/40 hover:bg-slate-800/70 transition-all duration-300 group">
-          <div class="w-14 h-14 bg-brand-500/10 text-brand-500 rounded-2xl flex items-center justify-center mb-6 text-2xl group-hover:scale-110 group-hover:bg-brand-500 group-hover:text-slate-950 transition-all">
-            <i class="fa-solid fa-water"></i>
-          </div>
-          <h4 class="font-bold text-lg text-white mb-2">Budidaya Ramah Lingkungan</h4>
-          <p class="text-slate-400 text-sm leading-relaxed">
-            Penerapan sistem pengelolaan air dan pakan efisien yang menjaga keberlanjutan ekosistem lokal.
-          </p>
-        </div>
-
-        <div class="p-8 bg-slate-800/40 rounded-3xl border border-slate-800 hover:border-brand-500/40 hover:bg-slate-800/70 transition-all duration-300 group">
-          <div class="w-14 h-14 bg-brand-500/10 text-brand-500 rounded-2xl flex items-center justify-center mb-6 text-2xl group-hover:scale-110 group-hover:bg-brand-500 group-hover:text-slate-950 transition-all">
-            <i class="fa-solid fa-seedling"></i>
-          </div>
-          <h4 class="font-bold text-lg text-white mb-2">Inovasi Pertanian</h4>
-          <p class="text-slate-400 text-sm leading-relaxed">
-            Integrasi tanaman pangan dengan sistem budidaya air terpadu untuk hasil yang optimal.
-          </p>
-        </div>
-
-        <div class="p-8 bg-slate-800/40 rounded-3xl border border-slate-800 hover:border-brand-500/40 hover:bg-slate-800/70 transition-all duration-300 group">
-          <div class="w-14 h-14 bg-brand-500/10 text-brand-500 rounded-2xl flex items-center justify-center mb-6 text-2xl group-hover:scale-110 group-hover:bg-brand-500 group-hover:text-slate-950 transition-all">
-            <i class="fa-solid fa-graduation-cap"></i>
-          </div>
-          <h4 class="font-bold text-lg text-white mb-2">Edukasi Pelajar & Mahasiswa</h4>
-          <p class="text-slate-400 text-sm leading-relaxed">
-            Wadah kegiatan akademis dalam mempelajari budidaya ikan air tawar serta pertanian terpadu.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <!-- SEKTOR UNGGULAN -->
-    <section id="sektor" class="py-24 bg-slate-950/60 border-y border-slate-800 px-6 relative">
-      <div class="max-w-6xl mx-auto">
-        <div class="text-center max-w-2xl mx-auto mb-16">
-          <h2 class="text-xs font-semibold uppercase tracking-widest text-brand-500 mb-3">Kategori Unggulan</h2>
-          <h3 class="text-3xl md:text-4xl font-bold text-white">Fokus Sektor Utama</h3>
-        </div>
-
-        <div class="grid md:grid-cols-2 gap-8">
-          <div class="bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 hover:border-slate-700 transition duration-300 group flex flex-col">
-            <div class="overflow-hidden h-64 relative">
-              <img
-                src="Assets/areaIkan.jpeg"
-                alt="Area Ikan"
-                class="h-full w-full object-cover group-hover:scale-105 transition duration-500"
-              />
-              <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
-              <span class="absolute bottom-4 left-4 text-xs font-bold text-cyan-400 bg-cyan-950/80 border border-cyan-800/60 px-3 py-1.5 rounded-lg backdrop-blur-md">
-                Budidaya Air Tawar
-              </span>
-            </div>
-            <div class="p-8 flex-1 flex flex-col justify-between">
-              <div>
-                <h4 class="text-2xl font-bold text-white group-hover:text-brand-500 transition-colors">
-                  Komoditas Lele, Bawal & Patin
-                </h4>
-                <p class="text-slate-400 text-sm mt-3 leading-relaxed">
-                  Optimalisasi ekosistem kolam empang lokal untuk budidaya Ikan Lele, Bawal, dan Patin secara produktif, berfokus pada ketahanan pakan alami serta daya tahan ikan yang unggul.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-slate-900 rounded-3xl overflow-hidden border border-slate-800 hover:border-slate-700 transition duration-300 group flex flex-col">
-            <div class="overflow-hidden h-64 relative">
-              <img
-                src="Assets/Tanaman.jpg"
-                alt="Tanaman"
-                class="h-full w-full object-cover group-hover:scale-105 transition duration-500"
-              />
-              <div class="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
-              <span class="absolute bottom-4 left-4 text-xs font-bold text-emerald-400 bg-emerald-950/80 border border-emerald-800/60 px-3 py-1.5 rounded-lg backdrop-blur-md">
-                Pertanian Terpadu
-              </span>
-            </div>
-            <div class="p-8 flex-1 flex flex-col justify-between">
-              <div>
-                <h4 class="text-2xl font-bold text-white group-hover:text-brand-500 transition-colors">
-                  Lahan Hijau & Pangan Lokal
-                </h4>
-                <p class="text-slate-400 text-sm mt-3 leading-relaxed">
-                  Pemanfaatan lahan sekitar kolam untuk tanaman hortikultura, sayuran organik, dan pakan alami yang menunjang ketahanan pangan lokal.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- GALERI KEGIATAN -->
-    <section id="kegiatan" class="py-24 px-6 max-w-6xl mx-auto">
-      <div class="text-center max-w-2xl mx-auto mb-16">
-        <h2 class="text-xs font-semibold uppercase tracking-widest text-brand-500 mb-3">Dokumentasi</h2>
-        <h3 class="text-3xl md:text-4xl font-bold text-white">Kegiatan & Edukasi Lapangan</h3>
-      </div>
-
-      <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
-        <div class="overflow-hidden rounded-2xl border border-slate-800 group relative aspect-[4/5]">
-          <img
-            src="Assets/IMG_20260730_135710.jpg"
-            alt="Kegiatan 1"
-            class="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        </div>
-
-        <div class="overflow-hidden rounded-2xl border border-slate-800 group relative aspect-[4/5]">
-          <img
-            src="Assets/IMG_20260730_135724.jpg"
-            alt="Kegiatan 2"
-            class="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        </div>
-
-        <div class="overflow-hidden rounded-2xl border border-slate-800 group relative aspect-[4/5]">
-          <img
-            src="Assets/kegiatan.png"
-            alt="Kegiatan 3"
-            class="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        </div>
-
-        <div class="overflow-hidden rounded-2xl border border-slate-800 group relative aspect-[4/5]">
-          <img
-            src="Assets/IMG_20260730_135734.jpg"
-            alt="Kegiatan 4"
-            class="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-          />
-          <div class="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION FAQ ACCORDION -->
-    <section id="faq" class="py-24 bg-slate-950/60 border-t border-slate-800 px-6">
-      <div class="max-w-4xl mx-auto">
-        <div class="text-center max-w-2xl mx-auto mb-16">
-          <h2 class="text-xs font-semibold uppercase tracking-widest text-brand-500 mb-3">Informasi Tambahan</h2>
-          <h3 class="text-3xl md:text-4xl font-bold text-white">Pertanyaan Umum (FAQ)</h3>
-          <p class="text-slate-400 text-sm mt-2">
-            Hal-hal yang sering ditanyakan mengenai kawasan Sentra Mekarmukti
-          </p>
-        </div>
-
-        <div class="space-y-4">
-          <details class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 group cursor-pointer transition-all">
-            <summary class="font-bold text-white flex justify-between items-center list-none text-base">
-              <span>Apakah lokasi ini menerima kunjungan studi banding / edukasi?</span>
-              <span class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 group-open:bg-brand-500 group-open:text-slate-950 group-open:rotate-180 transition-all">
-                <i class="fa-solid fa-chevron-down text-xs"></i>
-              </span>
-            </summary>
-            <p class="text-slate-400 text-sm mt-4 pt-4 border-t border-slate-800/80 leading-relaxed">
-              Ya, kami sangat terbuka untuk kunjungan lapangan dari sekolah, instansi, maupun kelompok tani untuk belajar bersama seputar budidaya ikan dan pertanian terpadu.
-            </p>
-          </details>
-          
-          <details class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 group cursor-pointer transition-all">
-            <summary class="font-bold text-white flex justify-between items-center list-none text-base">
-              <span>Bagaimana cara memesan atau membeli hasil panen ikan?</span>
-              <span class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 group-open:bg-brand-500 group-open:text-slate-950 group-open:rotate-180 transition-all">
-                <i class="fa-solid fa-chevron-down text-xs"></i>
-              </span>
-            </summary>
-            <p class="text-slate-400 text-sm mt-4 pt-4 border-t border-slate-800/80 leading-relaxed">
-              Pemesanan hasil panen (Lele, Bawal, Patin) dapat dilakukan dengan menghubungi pengelola langsung via WhatsApp di kontak yang tertera pada bagian bawah web.
-            </p>
-          </details>
-
-          <details class="bg-slate-900/80 p-6 rounded-2xl border border-slate-800 group cursor-pointer transition-all">
-            <summary class="font-bold text-white flex justify-between items-center list-none text-base">
-              <span>Kapan jam operasional kunjungan lokasi?</span>
-              <span class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 group-open:bg-brand-500 group-open:text-slate-950 group-open:rotate-180 transition-all">
-                <i class="fa-solid fa-chevron-down text-xs"></i>
-              </span>
-            </summary>
-            <p class="text-slate-400 text-sm mt-4 pt-4 border-t border-slate-800/80 leading-relaxed">
-              Kawasan kami terbuka setiap hari Senin sampai Minggu mulai pukul 07.00 hingga 17.00 WIB.
-            </p>
-          </details>
-        </div>
-      </div>
-    </section>
-
-    <!-- SECTION LOKASI & KONTAK -->
-    <section id="lokasi" class="py-24 px-6 bg-slate-900">
-      <div class="max-w-6xl mx-auto">
-        <div class="text-center max-w-2xl mx-auto mb-16">
-          <h2 class="text-xs font-semibold uppercase tracking-widest text-brand-500 mb-3">Kontak & Navigasi</h2>
-          <h3 class="text-3xl md:text-4xl font-bold text-white">Lokasi & Informasi Kontak</h3>
-          <p class="text-slate-400 text-sm mt-2">
-            Silakan datang langsung atau hubungi kami untuk informasi pemesanan hasil panen, konsultasi, dan kunjungan edukasi.
-          </p>
-        </div>
-
-        <div class="grid lg:grid-cols-12 gap-8 items-stretch">
-          <div class="lg:col-span-7 bg-slate-800 rounded-3xl overflow-hidden shadow-2xl h-[380px] lg:h-auto border border-slate-700/60 relative">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d686.7913708945017!2d107.16292639518196!3d-6.285686848961626!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e698500284e87bb%3A0x2b3f4a3702bd790!2sSentra%20Mina%20Argo%20Mekarmukti!5e1!3m2!1sid!2sid!4v1785394348468!5m2!1sid!2sid"
-              width="100%"
-              height="100%"
-              style="border: 0; filter: opacity(0.85);"
-              allowfullscreen=""
-              loading="lazy"
-              referrerpolicy="strict-origin-when-cross-origin"
-            >
-            </iframe>
-          </div>
-
-          <div class="lg:col-span-5 bg-gradient-to-br from-slate-800 to-slate-800/40 border border-slate-700/60 text-white rounded-3xl p-8 flex flex-col justify-between shadow-2xl backdrop-blur-sm">
-            <div>
-              <h4 class="text-xl font-bold mb-6 text-brand-500 border-b border-slate-700/60 pb-4">
-                Hubungi Kami
-              </h4>
-
-              <div class="space-y-5">
-                <div class="flex items-start gap-4">
-                  <div class="p-3 bg-brand-500/10 rounded-2xl text-brand-500 shrink-0 border border-brand-500/20">
-                    <i class="fa-solid fa-location-dot text-base"></i>
-                  </div>
-                  <div>
-                    <h5 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Alamat Utama</h5>
-                    <p class="text-sm text-slate-200 mt-1 leading-relaxed">
-                      P577+P9H, Mekarmukti, Kec. Cikarang Utara, Kabupaten Bekasi, Jawa Barat 17530
-                    </p>
-                  </div>
+<body>
+    <div class="auth-wrapper" id="authWrapper">
+        
+        <!-- 1. FORM ADMIN (Memerlukan Email & Password) -->
+        <div class="auth-form-box register-form-box">
+            <form id="adminForm" action="#">
+                <h1>Masuk Admin</h1>
+                <p class="form-desc">Khusus pengelola & admin sistem</p>
+                
+                <div class="input-group">
+                    <input type="email" id="adminEmail" placeholder="Email Admin" required />
+                    <input type="password" id="adminPassword" placeholder="Kata Sandi" required />
                 </div>
 
-                <div class="flex items-start gap-4">
-                  <div class="p-3 bg-brand-500/10 rounded-2xl text-brand-500 shrink-0 border border-brand-500/20">
-                    <i class="fa-brands fa-whatsapp text-base"></i>
-                  </div>
-                  <div>
-                    <h5 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Telepon / WhatsApp</h5>
-                    <a
-                      href="https://wa.me/6289678928129"
-                      target="_blank"
-                      class="text-sm text-slate-200 hover:text-brand-500 transition-colors mt-1 block font-medium"
-                    >
-                      +62 896-7892-8129
-                    </a>
-                  </div>
+                <a href="#" class="forgot-link">Lupa kata sandi?</a>
+                <button type="submit">Masuk sebagai Admin</button>
+
+                <div class="mobile-switch">
+                    <p>Bukan admin? Ingin menjelajah?</p>
+                    <button type="button" id="mobileVisitorBtn">Kunjungi Portal</button>
                 </div>
-
-                <div class="flex items-start gap-4">
-                  <div class="p-3 bg-brand-500/10 rounded-2xl text-brand-500 shrink-0 border border-brand-500/20">
-                    <i class="fa-regular fa-envelope text-base"></i>
-                  </div>
-                  <div>
-                    <h5 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Email</h5>
-                    <a
-                      href="mailto:info@mekarmukti.id"
-                      class="text-sm text-slate-200 hover:text-brand-500 transition-colors mt-1 block font-medium"
-                    >
-                      info@mekarmukti.id
-                    </a>
-                  </div>
-                </div>
-
-                <div class="flex items-start gap-4">
-                  <div class="p-3 bg-brand-500/10 rounded-2xl text-brand-500 shrink-0 border border-brand-500/20">
-                    <i class="fa-regular fa-clock text-base"></i>
-                  </div>
-                  <div>
-                    <h5 class="text-xs font-semibold uppercase tracking-wider text-slate-400">Jam Operasional</h5>
-                    <p class="text-sm text-slate-200 mt-1 font-medium">
-                      Senin - Minggu: 07.00 - 17.00 WIB
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="mt-8 pt-6 border-t border-slate-700/60 space-y-3">
-              <a
-                href="https://wa.me/6289678928129"
-                target="_blank"
-                class="w-full bg-brand-500 hover:bg-brand-600 text-slate-950 font-bold py-3.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-sm shadow-lg shadow-brand-500/10 active:scale-95"
-              >
-                <i class="fa-brands fa-whatsapp text-lg"></i>
-                <span>Chat via WhatsApp</span>
-              </a>
-
-              <a
-                href="https://maps.google.com/?q=-6.2856868,107.1629263"
-                target="_blank"
-                class="w-full bg-slate-900 hover:bg-slate-950 text-slate-200 font-semibold py-3.5 px-4 rounded-xl transition-all flex items-center justify-center gap-2 text-sm border border-slate-700 active:scale-95"
-              >
-                <i class="fa-solid fa-diamond-turn-right text-sm text-brand-500"></i>
-                <span>Petunjuk Arah (Google Maps)</span>
-              </a>
-            </div>
-          </div>
+            </form>
         </div>
-      </div>
-    </section>
 
-    <!-- FOOTER -->
-    <footer class="bg-slate-950 text-slate-500 py-10 text-center text-xs border-t border-slate-800/80">
-      <p>&copy; 2026 Sentra Mina & Tani Mekarmukti. Portal Informasi & Showcase Budidaya.</p>
-    </footer>
+        <!-- 2. FORM KUNJUNGI / TAMU (Tanpa Email & Password) -->
+        <div class="auth-form-box login-form-box">
+            <form id="visitorForm" action="#">
+                <h1>Kunjungi Website</h1>
+                <p class="form-desc">Masuk langsung sebagai pengunjung tanpa perlu mendaftar atau isi kata sandi.</p>
+                
+                <div class="visitor-badge">
+                    <i class="fa-solid fa-compass"></i>
+                    <span>Akses Tamu / Pengunjung</span>
+                </div>
 
-    <!-- TOMBOL FLOATING WHATSAPP -->
-    <a
-      href="https://wa.me/6289678928129"
-      target="_blank"
-      class="fixed bottom-6 right-6 bg-brand-500 hover:bg-brand-600 text-slate-950 p-4 rounded-full shadow-2xl z-50 flex items-center justify-center transition-all hover:scale-110 active:scale-95 border border-brand-400"
-      title="Hubungi Kami di WhatsApp"
-    >
-      <i class="fa-brands fa-whatsapp text-2xl"></i>
-    </a>
-    
-    <!-- PEMANGGILAN SCRIPT JS TERPISAH -->
-    <script src="JS/main.js"></script>
-  </body>
-</html>
+                <button type="submit" class="btn-visitor">
+                    <span>Kunjungi</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+
+                <div class="mobile-switch">
+                    <p>Pengelola / Admin sistem?</p>
+                    <button type="button" id="mobileAdminBtn">Masuk Admin</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- SLIDE PANEL (DESKTOP) -->
+        <div class="slide-panel-wrapper">
+            <div class="slide-panel">
+                <!-- Panel Kiri (Akan muncul saat mode Admin aktif) -->
+                <div class="panel-content panel-content-left">
+                    <h1>Ingin Menjelajah?</h1>
+                    <p>Masuk sebagai pengunjung umum untuk melihat potensi daerah, profil budidaya, dan sektor unggulan.</p>
+                    <button type="button" class="transparent-btn" id="visitorBtn">Kunjungi Portal</button>
+                </div>
+
+                <!-- Panel Kanan (Akan muncul saat mode Kunjungi aktif) -->
+                <div class="panel-content panel-content-right">
+                    <h1>Area Pengelola 🔐</h1>
+                    <p>Khusus admin untuk mengelola data, memperbarui konten, dan pengaturan sistem Sentra Mina Argo Mekarmukti.</p>
+                    <button type="button" class="transparent-btn" id="adminBtn">Masuk Admin</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <script src="JS/form.js"></script>
+</body>
+</html>>

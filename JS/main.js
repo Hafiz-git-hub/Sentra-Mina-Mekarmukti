@@ -18,18 +18,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const now = new Date();
     const dateStr = now.toLocaleDateString('id-ID', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
+      weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
     });
-
     const timeStr = now.toLocaleTimeString('id-ID', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
     });
-
     const fullString = `${dateStr} | ${timeStr}`;
 
     if (desktopClock) desktopClock.textContent = fullString;
@@ -159,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
   sections.forEach((s) => sectionObserver.observe(s));
 
   /* ============================================
-     7. BACK TO TOP BUTTON
+     7. BACK TO TOP
      ============================================ */
   const backToTop = document.getElementById('backToTop');
   window.addEventListener('scroll', () => {
@@ -257,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
   counters.forEach((c) => counterObserver.observe(c));
 
   /* ============================================
-     10. TYPING EFFECT HERO TITLE
+     10. TYPING EFFECT
      ============================================ */
   const typingEl = document.getElementById('typingText');
   if (typingEl) {
@@ -326,7 +319,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ============================================
-     13. TESTIMONI SLIDER AUTO
+     13. TESTIMONI SLIDER
      ============================================ */
   const slides = document.querySelectorAll('.testi-slide');
   const dots = document.querySelectorAll('.testi-dot');
@@ -370,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ============================================
-     14. MOBILE BOTTOM NAV — Hide on scroll down
+     14. MOBILE BOTTOM NAV
      ============================================ */
   const bottomNav = document.getElementById('bottomNav');
   if (bottomNav) {
@@ -384,5 +377,156 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       lastScroll = currentScroll;
     });
+  }
+
+  /* ============================================
+     15. MODAL LOGIN
+     ============================================ */
+  const loginModal = document.getElementById('loginModal');
+  const loginBtn = document.getElementById('loginBtn');
+  const loginModalClose = document.getElementById('loginModalClose');
+  const mobileLoginBtn = document.getElementById('mobileLoginBtn');
+
+  const tabAdmin = document.getElementById('tabAdmin');
+  const tabVisitor = document.getElementById('tabVisitor');
+  const panelAdmin = document.getElementById('panelAdmin');
+  const panelVisitor = document.getElementById('panelVisitor');
+
+  const adminFormModal = document.getElementById('adminFormModal');
+  const visitorFormModal = document.getElementById('visitorFormModal');
+
+  function openLoginModal() {
+    if (!loginModal) return;
+    loginModal.classList.remove('hidden');
+    loginModal.classList.add('flex');
+    requestAnimationFrame(() => {
+      loginModal.classList.remove('opacity-0');
+      const box = loginModal.querySelector('.login-box');
+      if (box) {
+        box.classList.remove('scale-95');
+        box.classList.add('scale-100');
+      }
+    });
+  }
+
+  function closeLoginModal() {
+    if (!loginModal) return;
+    loginModal.classList.add('opacity-0');
+    const box = loginModal.querySelector('.login-box');
+    if (box) {
+      box.classList.add('scale-95');
+      box.classList.remove('scale-100');
+    }
+    setTimeout(() => {
+      loginModal.classList.add('hidden');
+      loginModal.classList.remove('flex');
+    }, 300);
+  }
+
+  if (loginBtn) loginBtn.addEventListener('click', openLoginModal);
+  if (mobileLoginBtn) mobileLoginBtn.addEventListener('click', openLoginModal);
+  if (loginModalClose) loginModalClose.addEventListener('click', closeLoginModal);
+
+  if (loginModal) {
+    loginModal.addEventListener('click', (e) => {
+      if (e.target === loginModal) closeLoginModal();
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLoginModal();
+  });
+
+  function showAdminTab() {
+    if (!tabAdmin || !tabVisitor || !panelAdmin || !panelVisitor) return;
+    tabAdmin.classList.add('bg-brand-500', 'text-slate-950');
+    tabAdmin.classList.remove('text-slate-400');
+    tabVisitor.classList.remove('bg-brand-500', 'text-slate-950');
+    tabVisitor.classList.add('text-slate-400');
+    panelAdmin.classList.remove('hidden');
+    panelVisitor.classList.add('hidden');
+  }
+
+  function showVisitorTab() {
+    if (!tabAdmin || !tabVisitor || !panelAdmin || !panelVisitor) return;
+    tabVisitor.classList.add('bg-brand-500', 'text-slate-950');
+    tabVisitor.classList.remove('text-slate-400');
+    tabAdmin.classList.remove('bg-brand-500', 'text-slate-950');
+    tabAdmin.classList.add('text-slate-400');
+    panelVisitor.classList.remove('hidden');
+    panelAdmin.classList.add('hidden');
+  }
+
+  if (tabAdmin) tabAdmin.addEventListener('click', showAdminTab);
+  if (tabVisitor) tabVisitor.addEventListener('click', showVisitorTab);
+
+  if (adminFormModal) {
+    adminFormModal.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = document.getElementById('modalAdminEmail').value;
+      const password = document.getElementById('modalAdminPassword').value;
+
+      if (email && password) {
+        closeLoginModal();
+        setTimeout(() => {
+          showToast(`Login berhasil! Selamat datang, ${email}`, 'success');
+        }, 350);
+      }
+    });
+  }
+
+  if (visitorFormModal) {
+    visitorFormModal.addEventListener('submit', (e) => {
+      e.preventDefault();
+      closeLoginModal();
+      setTimeout(() => {
+        showToast('Selamat datang di portal pengunjung!', 'success');
+      }, 350);
+    });
+  }
+
+  /* ============================================
+     16. TOAST NOTIFICATION
+     ============================================ */
+  function showToast(message, type = 'info') {
+    let toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+      toastContainer = document.createElement('div');
+      toastContainer.id = 'toastContainer';
+      toastContainer.className = 'fixed top-24 right-6 z-[70] flex flex-col gap-3';
+      document.body.appendChild(toastContainer);
+    }
+
+    const colors = {
+      success: 'bg-brand-500 text-slate-950 border-brand-400',
+      info: 'bg-slate-800 text-slate-100 border-slate-700',
+      error: 'bg-rose-500 text-white border-rose-400',
+    };
+
+    const icons = {
+      success: 'fa-solid fa-circle-check',
+      info: 'fa-solid fa-circle-info',
+      error: 'fa-solid fa-circle-exclamation',
+    };
+
+    const toast = document.createElement('div');
+    toast.className = `${colors[type]} border px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 text-sm font-semibold translate-x-[120%] transition-transform duration-300 ease-out max-w-xs`;
+    toast.innerHTML = `
+      <i class="${icons[type]}"></i>
+      <span>${message}</span>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    requestAnimationFrame(() => {
+      toast.classList.remove('translate-x-[120%]');
+      toast.classList.add('translate-x-0');
+    });
+
+    setTimeout(() => {
+      toast.classList.remove('translate-x-0');
+      toast.classList.add('translate-x-[120%]');
+      setTimeout(() => toast.remove(), 300);
+    }, 3500);
   }
 });

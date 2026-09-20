@@ -1,6 +1,6 @@
 // ============================================
 // BACKEND — Sentra Mina Argo Mekarmukti
-// Fase 3: API dengan Database MongoDB
+// Fase 4: API + Auth (JWT)
 // ============================================
 
 require("dotenv").config();
@@ -13,6 +13,9 @@ const Profil = require("./models/Profil");
 const Agenda = require("./models/Agenda");
 const Testimoni = require("./models/Testimoni");
 const Galeri = require("./models/Galeri");
+
+// Import routes
+const authRoutes = require("./routes/auth");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -31,6 +34,11 @@ app.use((req, res, next) => {
 });
 
 // ============================================
+// AUTH ROUTES
+// ============================================
+app.use("/api/auth", authRoutes);
+
+// ============================================
 // ENDPOINTS — GET (Read)
 // ============================================
 
@@ -39,6 +47,11 @@ app.get("/", (req, res) => {
   res.json({
     message: "API Sentra Mina Argo Mekarmukti — Connected to MongoDB",
     endpoints: {
+      // Auth
+      register: "POST /api/auth/register",
+      login: "POST /api/auth/login",
+      me: "GET /api/auth/me",
+      // Content
       profil: "GET /api/profil",
       agenda: "GET /api/agenda",
       agendaDetail: "GET /api/agenda/:id",
@@ -383,10 +396,14 @@ app.listen(PORT, () => {
   console.log("========================================");
   console.log(`✅ Server jalan di http://localhost:${PORT}`);
   console.log("========================================");
-  console.log("🌐 Endpoint yang tersedia:");
+  console.log("🔐 AUTH:");
+  console.log(`   POST   http://localhost:${PORT}/api/auth/register`);
+  console.log(`   POST   http://localhost:${PORT}/api/auth/login`);
+  console.log(`   GET    http://localhost:${PORT}/api/auth/me`);
+  console.log("========================================");
+  console.log("🌐 CONTENT:");
   console.log(`   GET    http://localhost:${PORT}/api/profil`);
   console.log(`   GET    http://localhost:${PORT}/api/agenda`);
-  console.log(`   GET    http://localhost:${PORT}/api/agenda/:id`);
   console.log(`   POST   http://localhost:${PORT}/api/agenda`);
   console.log(`   PUT    http://localhost:${PORT}/api/agenda/:id`);
   console.log(`   DELETE http://localhost:${PORT}/api/agenda/:id`);

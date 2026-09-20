@@ -476,15 +476,67 @@ document.addEventListener("DOMContentLoaded", () => {
   if (tabVisitor) tabVisitor.addEventListener("click", showVisitorTab);
 
   if (adminFormModal) {
-    adminFormModal.addEventListener("submit", (e) => {
+    adminFormModal.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const email = document.getElementById("modalAdminEmail").value;
-      const password = document.getElementById("modalAdminPassword").value;
-      if (email && password) {
+
+      const email = document.getElementById("modalAdminEmail").value.trim();
+      const password = document
+        .getElementById("modalAdminPassword")
+        .value.trim();
+
+      // Validasi basic
+      if (!email || !password) {
+        showToast("Email dan password wajib diisi", "error");
+        return;
+      }
+
+      // Disable tombol submit biar gak double-click
+      const submitBtn = adminFormModal.querySelector('button[type="submit"]');
+      const originalText = submitBtn.innerHTML;
+      submitBtn.disabled = true;
+      submitBtn.innerHTML =
+        '<i class="fa-solid fa-spinner fa-spin"></i> <span>Memproses...</span>';
+
+      try {
+        // Kirim ke backend
+        const res = await fetch(`${API_URL}/api/auth/login`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.success) {
+          // Login gagal
+          showToast(data.message || "Email atau password salah", "error");
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalText;
+          return;
+        }
+
+        // Login sukses — simpan token & data user
+        localStorage.setItem("adminToken", data.token);
+        localStorage.setItem("adminUser", JSON.stringify(data.user));
+
+        showToast(
+          `Login berhasil! Selamat datang, ${data.user.nama}`,
+          "success",
+        );
+
         closeLoginModal();
+
+        // Redirect ke admin panel setelah 800ms
         setTimeout(() => {
-          showToast(`Login berhasil! Selamat datang, ${email}`, "success");
-        }, 350);
+          window.location.href = "admin.html";
+        }, 800);
+      } catch (error) {
+        console.error("Login error:", error);
+        showToast("Gagal terhubung ke server. Coba lagi.", "error");
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
       }
     });
   }

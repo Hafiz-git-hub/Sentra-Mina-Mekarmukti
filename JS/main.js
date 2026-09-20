@@ -484,13 +484,11 @@ document.addEventListener("DOMContentLoaded", () => {
         .getElementById("modalAdminPassword")
         .value.trim();
 
-      // Validasi basic
       if (!email || !password) {
         showToast("Email dan password wajib diisi", "error");
         return;
       }
 
-      // Disable tombol submit biar gak double-click
       const submitBtn = adminFormModal.querySelector('button[type="submit"]');
       const originalText = submitBtn.innerHTML;
       submitBtn.disabled = true;
@@ -498,26 +496,21 @@ document.addEventListener("DOMContentLoaded", () => {
         '<i class="fa-solid fa-spinner fa-spin"></i> <span>Memproses...</span>';
 
       try {
-        // Kirim ke backend
         const res = await fetch(`${API_URL}/api/auth/login`, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         });
 
         const data = await res.json();
 
         if (!res.ok || !data.success) {
-          // Login gagal
           showToast(data.message || "Email atau password salah", "error");
           submitBtn.disabled = false;
           submitBtn.innerHTML = originalText;
           return;
         }
 
-        // Login sukses — simpan token & data user
         localStorage.setItem("adminToken", data.token);
         localStorage.setItem("adminUser", JSON.stringify(data.user));
 
@@ -528,7 +521,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         closeLoginModal();
 
-        // Redirect ke admin panel setelah 800ms
         setTimeout(() => {
           window.location.href = "admin.html";
         }, 800);
@@ -626,11 +618,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       console.log("✅ Testimoni loaded:", data.length, "item");
 
-      // Hapus slide & dots lama
       container.querySelectorAll(".testi-slide").forEach((el) => el.remove());
       container.querySelectorAll(".testi-dot").forEach((el) => el.remove());
 
-      // Bikin slides baru
       data.forEach((item, i) => {
         const slide = document.createElement("div");
         slide.className = `testi-slide transition-all duration-500 absolute inset-0 p-8 md:p-12 flex flex-col justify-center ${
@@ -653,7 +643,6 @@ document.addEventListener("DOMContentLoaded", () => {
         container.appendChild(slide);
       });
 
-      // Bikin dots baru
       const dotsContainer = document.createElement("div");
       dotsContainer.className =
         "absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20";
@@ -677,24 +666,157 @@ document.addEventListener("DOMContentLoaded", () => {
      19. LOAD GALERI DARI DATABASE
      ============================================ */
   async function loadGaleri() {
-    attachLightboxEvents();
+    const container = document.getElementById("galeriGrid");
+    if (!container) {
+      console.warn("⚠️ Container galeri (id=galeriGrid) gak ketemu");
+      return;
+    }
 
-    // Paksa galeri baru langsung keliatan (skip animasi reveal)
-    setTimeout(() => {
-      document.querySelectorAll("#galeriGrid .gallery-item").forEach((el) => {
-        el.classList.add("reveal-active");
+    try {
+      const res = await fetch(`${API_URL}/api/galeri`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      console.log("✅ Galeri loaded:", data.length, "item");
+
+      container.innerHTML = "";
+
+      data.forEach((item) => {
+        const card = document.createElement("div");
+        card.className =
+          "reveal gallery-item cursor-pointer overflow-hidden rounded-2xl border border-slate-800 group relative aspect-[4/5]";
+        card.innerHTML = `
+          <img 
+            src="Assets/${item.file}" 
+            alt="${item.judul}" 
+            class="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+            onerror="this.src='Assets/Logo.png'"
+          />
+          <div class="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+            <i class="fa-solid fa-magnifying-glass-plus text-3xl text-brand-500"></i>
+          </div>
+        `;
+        container.appendChild(card);
       });
-    }, 100);
+
+      attachLightboxEvents();
+
+      setTimeout(() => {
+        document.querySelectorAll("#galeriGrid .gallery-item").forEach((el) => {
+          el.classList.add("reveal-active");
+        });
+      }, 100);
+    } catch (err) {
+      console.error("❌ Gagal load galeri:", err.message);
+    }
   }
 
   /* ============================================
-     20. JALANKAN SEMUA
+     20. LOAD AGENDA DARI DATABASE
      ============================================ */
-  loadTestimoni();
-  loadGaleri();
+  async function loadAgenda() {
+    const container = document.getElementById("listAgendaPublic");
+    if (!container) {
+      console.warn("⚠️ Container agenda publik gak ketemu");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_URL}/api/agenda`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+
+      console.log("✅ Agenda loaded:", data.length, "item");
+
+      if (!data.length) {
+        container.innerHTML =
+          '<p class="text-slate-500 text-center py-12">Belum ada agenda kegiatan.</p>';
+        return;
+      }
+
+      // Mapping warna per kategori
+      const categoryColors = {
+        pelatihan: {
+          bg: "bg-cyan-950/80",
+          text: "text-cyan-400",
+          border: "border-cyan-800/60",
+        },
+        edukasi: {
+          bg: "bg-emerald-950/80",
+          text: "text-emerald-400",
+          border: "border-emerald-800/60",
+        },
+        panen: {
+          bg: "bg-amber-950/80",
+          text: "text-amber-400",
+          border: "border-amber-800/60",
+        },
+        lainnya: {
+          bg: "bg-slate-800/80",
+          text: "text-slate-400",
+          border: "border-slate-700/60",
+        },
+      };
+
+      container.innerHTML = data
+        .map((item) => {
+          const date = new Date(item.tanggal);
+          const day = date.getDate().toString().padStart(2, "0");
+          const month = date
+            .toLocaleDateString("id-ID", { month: "short" })
+            .toUpperCase();
+          const year = date.getFullYear();
+
+          const color = categoryColors[item.kategori] || categoryColors.lainnya;
+
+          return `
+          <div class="reveal group bg-slate-800/40 border border-slate-800 hover:border-brand-500/40 hover:bg-slate-800/70 transition-all duration-300 rounded-2xl overflow-hidden">
+            <div class="flex flex-col sm:flex-row gap-0">
+              <div class="sm:w-28 shrink-0 bg-gradient-to-br from-brand-500 to-brand-600 p-4 sm:p-6 flex sm:flex-col items-center justify-center gap-2 sm:gap-0 text-slate-950">
+                <div class="text-3xl sm:text-4xl font-extrabold leading-none">${day}</div>
+                <div class="text-xs sm:text-sm font-bold tracking-wider">${month}</div>
+                <div class="text-[10px] sm:text-xs font-semibold opacity-70 sm:mt-1">${year}</div>
+              </div>
+
+              <div class="flex-1 p-5 sm:p-6">
+                <div class="flex flex-wrap items-center gap-2 mb-3">
+                  <span class="text-xs font-bold ${color.text} ${color.bg} border ${color.border} px-3 py-1 rounded-lg capitalize">
+                    ${item.kategori || "lainnya"}
+                  </span>
+                  <span class="text-xs text-slate-400 flex items-center gap-1">
+                    <i class="fa-solid fa-location-dot"></i>
+                    ${item.lokasi}
+                  </span>
+                </div>
+
+                <h4 class="text-lg sm:text-xl font-bold text-white group-hover:text-brand-500 transition-colors mb-2">
+                  ${item.judul}
+                </h4>
+
+                <p class="text-slate-400 text-sm leading-relaxed">
+                  ${item.deskripsi}
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+        })
+        .join("");
+
+      setTimeout(() => {
+        document
+          .querySelectorAll("#listAgendaPublic .reveal")
+          .forEach((el) => el.classList.add("reveal-active"));
+      }, 100);
+    } catch (err) {
+      console.error("❌ Gagal load agenda:", err.message);
+      container.innerHTML =
+        '<p class="text-rose-400 text-center py-12">Gagal memuat agenda.</p>';
+    }
+  }
 
   /* ============================================
-     20. LOAD STATISTIK DARI DATABASE
+     21. LOAD STATISTIK DARI DATABASE
      ============================================ */
   async function loadStatistik() {
     try {
@@ -704,10 +826,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       console.log("✅ Statistik loaded:", data);
 
-      // Update counter di halaman
       const counters = document.querySelectorAll(".counter");
 
-      // Urutan counter: Kolam Aktif, Panen, Pengunjung
       const values = [
         { target: data.kolamAktif, suffix: "+" },
         { target: data.panenPerBulan, suffix: "kg" },
@@ -727,5 +847,11 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  /* ============================================
+     22. JALANKAN SEMUA
+     ============================================ */
+  loadTestimoni();
+  loadGaleri();
+  loadAgenda();
   loadStatistik();
 });

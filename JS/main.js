@@ -687,7 +687,7 @@ document.addEventListener("DOMContentLoaded", () => {
           "reveal gallery-item cursor-pointer overflow-hidden rounded-2xl border border-slate-800 group relative aspect-[4/5]";
         card.innerHTML = `
           <img 
-            src="Assets/${item.file}" 
+            src="${item.file.startsWith("http") ? item.file : `Assets/${item.file}`}" 
             alt="${item.judul}" 
             class="w-full h-full object-cover group-hover:scale-110 transition duration-500"
             onerror="this.src='Assets/Logo.png'"

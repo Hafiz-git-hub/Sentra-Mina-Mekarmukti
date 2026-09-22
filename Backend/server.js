@@ -16,7 +16,7 @@ const Galeri = require("./models/Galeri");
 
 // Import routes
 const authRoutes = require("./routes/auth");
-
+const uploadRoutes = require("./routes/upload");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -37,6 +37,11 @@ app.use((req, res, next) => {
 // AUTH ROUTES
 // ============================================
 app.use("/api/auth", authRoutes);
+
+// ============================================
+// UPLOAD ROUTES
+// ============================================
+app.use("/api/upload", uploadRoutes);
 
 // ============================================
 // ENDPOINTS — GET (Read)
@@ -255,7 +260,7 @@ app.put("/api/agenda/:id", async (req, res) => {
     const agendaUpdate = await Agenda.findByIdAndUpdate(
       req.params.id,
       { judul, tanggal, lokasi, deskripsi, kategori },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!agendaUpdate) {
@@ -279,7 +284,7 @@ app.put("/api/testimoni/:id", async (req, res) => {
     const testimoniUpdate = await Testimoni.findByIdAndUpdate(
       req.params.id,
       { nama, peran, pesan, inisial },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!testimoniUpdate) {
@@ -303,7 +308,7 @@ app.put("/api/galeri/:id", async (req, res) => {
     const galeriUpdate = await Galeri.findByIdAndUpdate(
       req.params.id,
       { judul, file, kategori },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     if (!galeriUpdate) {

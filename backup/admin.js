@@ -3,7 +3,8 @@
 // ============================================
 
 const API_URL = "https://sentra-mina-backend-production.up.railway.app";
-// ⚠️ Untuk lokal, ganti ke: "http://localhost:3000"
+// ⚠️ GANTI ke Railway kalau udah deploy:
+// const API_URL = "https://sentra-mina-backend-production.up.railway.app";
 
 // ============================================
 // CEK AUTENTIKASI
@@ -22,12 +23,36 @@ document.addEventListener("DOMContentLoaded", () => {
     userNameEl.textContent = user.nama;
   }
 
+  // Hide loading, show app
   setTimeout(() => {
     document.getElementById("loadingOverlay").style.display = "none";
     document.getElementById("adminApp").classList.remove("hidden");
     loadDashboard();
   }, 500);
 });
+
+// ============================================
+// HELPER: Fetch dengan Token
+// ============================================
+async function apiFetch(path, options = {}) {
+  const headers = {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+    ...(options.headers || {}),
+  };
+
+  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+
+  // Kalau token expired / invalid → logout
+  if (res.status === 401) {
+    localStorage.removeItem("adminToken");
+    localStorage.removeItem("adminUser");
+    window.location.href = "index.html";
+    return null;
+  }
+
+  return res;
+}
 
 // ============================================
 // TOAST NOTIFICATION
@@ -63,39 +88,32 @@ function showToast(message, type = "info") {
 }
 
 // ============================================
-// HELPER: Escape HTML
-// ============================================
-function escapeHtml(str) {
-  return String(str || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-// ============================================
 // NAVIGASI SIDEBAR
 // ============================================
 document.querySelectorAll(".sidebar-link").forEach((link) => {
   link.addEventListener("click", (e) => {
     e.preventDefault();
-    switchPage(link.dataset.menu);
+    const menu = link.dataset.menu;
+    switchPage(menu);
   });
 });
 
 function switchPage(menu) {
+  // Update active link
   document.querySelectorAll(".sidebar-link").forEach((l) => {
     l.classList.toggle("active", l.dataset.menu === menu);
   });
 
+  // Show/hide sections
   document.querySelectorAll(".section-page").forEach((s) => {
     s.classList.add("hidden");
   });
   document.getElementById(`section-${menu}`).classList.remove("hidden");
 
+  // Close sidebar mobile
   closeSidebar();
 
+  // Load data
   if (menu === "testimoni") loadTestimoni();
   if (menu === "agenda") loadAgenda();
   if (menu === "galeri") loadGaleri();
@@ -103,7 +121,7 @@ function switchPage(menu) {
 }
 
 // ============================================
-// SIDEBAR MOBILE
+// SIDEBAR MOBILE TOGGLE
 // ============================================
 const sidebar = document.getElementById("sidebar");
 const sidebarOverlay = document.getElementById("sidebarOverlay");
@@ -134,7 +152,7 @@ document.getElementById("logoutBtn")?.addEventListener("click", () => {
 });
 
 // ============================================
-// LOAD DASHBOARD
+// LOAD DASHBOARD STATISTIK
 // ============================================
 async function loadDashboard() {
   try {
@@ -176,7 +194,7 @@ async function loadTestimoni() {
           <div class="flex-1">
             <div class="flex items-center gap-3 mb-3">
               <div class="w-10 h-10 rounded-full bg-brand-500 flex items-center justify-center font-bold text-slate-950 text-sm">
-                ${escapeHtml(item.inisial || "?")}
+                ${item.inisial || "?"}
               </div>
               <div>
                 <p class="font-bold text-white">${escapeHtml(item.nama)}</p>
@@ -282,15 +300,11 @@ async function loadGaleri() {
     }
 
     container.innerHTML = data
-      .map((item) => {
-        // Detect apakah file URL atau nama file lokal
-        const isUrl = item.file.startsWith("http");
-        const imgSrc = isUrl ? item.file : `Assets/${escapeHtml(item.file)}`;
-
-        return `
+      .map(
+        (item) => `
       <div class="bg-slate-800/40 border border-slate-800 rounded-2xl overflow-hidden hover:border-slate-700 transition-all group">
         <div class="aspect-[4/5] overflow-hidden relative">
-          <img src="${imgSrc}" alt="${escapeHtml(item.judul)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='Assets/Logo.png'" />
+          <img src="Assets/${escapeHtml(item.file)}" alt="${escapeHtml(item.judul)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='Assets/Logo.png'" />
           <span class="absolute top-2 left-2 text-[10px] font-bold text-cyan-400 bg-cyan-950/80 border border-cyan-800/60 px-2 py-0.5 rounded">
             ${escapeHtml(item.kategori || "lainnya")}
           </span>
@@ -307,14 +321,26 @@ async function loadGaleri() {
           </div>
         </div>
       </div>
-    `;
-      })
+    `,
+      )
       .join("");
   } catch (err) {
     console.error(err);
     container.innerHTML =
       '<p class="text-rose-400 text-center py-12 col-span-full">Gagal memuat data.</p>';
   }
+}
+
+// ============================================
+// HELPER: Escape HTML
+// ============================================
+function escapeHtml(str) {
+  return String(str || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 }
 
 // ============================================
@@ -328,12 +354,14 @@ const formFields = document.getElementById("formFields");
 let currentType = null;
 let currentId = null;
 
+// Tombol tambah
 document.querySelectorAll("[data-add]").forEach((btn) => {
   btn.addEventListener("click", () => {
     openModal(btn.dataset.add, null);
   });
 });
 
+// Tutup modal
 document.getElementById("modalClose")?.addEventListener("click", closeModal);
 document.getElementById("modalCancel")?.addEventListener("click", closeModal);
 modal?.addEventListener("click", (e) => {
@@ -344,6 +372,7 @@ function openModal(type, data = null) {
   currentType = type;
   currentId = data?._id || null;
 
+  // Set title
   const titles = {
     testimoni: "Testimoni",
     agenda: "Agenda",
@@ -351,9 +380,9 @@ function openModal(type, data = null) {
   };
   modalTitle.textContent = (data ? "Edit " : "Tambah ") + titles[type];
 
+  // Set form fields
   let fields = "";
 
-  // ============ FORM TESTIMONI ============
   if (type === "testimoni") {
     fields = `
       <div>
@@ -375,7 +404,6 @@ function openModal(type, data = null) {
     `;
   }
 
-  // ============ FORM AGENDA ============
   if (type === "agenda") {
     fields = `
       <div>
@@ -408,41 +436,17 @@ function openModal(type, data = null) {
     `;
   }
 
-  // ============ FORM GALERI (DENGAN UPLOAD) ============
   if (type === "galeri") {
-    const currentFile = data?.file || "";
-    const isUrl = currentFile.startsWith("http");
-    const previewSrc = isUrl
-      ? currentFile
-      : currentFile
-        ? `Assets/${currentFile}`
-        : "";
-
     fields = `
       <div>
         <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 block">Judul</label>
         <input type="text" name="judul" required value="${escapeHtml(data?.judul || "")}" class="w-full bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-500 transition-all" />
       </div>
-
       <div>
-        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 block">Upload Gambar</label>
-        <div id="uploadArea" class="border-2 border-dashed border-slate-700 hover:border-brand-500/60 rounded-xl p-4 text-center cursor-pointer transition-all">
-          <input type="file" id="fileInput" accept="image/*" class="hidden" />
-          <div id="uploadPrompt" class="${previewSrc ? "hidden" : ""}">
-            <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-500 mb-2"></i>
-            <p class="text-sm text-slate-400">Klik untuk pilih gambar</p>
-            <p class="text-xs text-slate-500 mt-1">JPG, PNG, WebP — max 5MB</p>
-          </div>
-          <div id="uploadPreview" class="${previewSrc ? "" : "hidden"}">
-            <img id="previewImg" src="${previewSrc}" alt="Preview" class="max-h-48 mx-auto rounded-lg mb-2" onerror="this.src='Assets/Logo.png'" />
-            <p class="text-xs text-slate-400">Klik untuk ganti gambar</p>
-          </div>
-        </div>
-        <div id="uploadStatus" class="text-xs mt-2 hidden"></div>
-        <input type="hidden" name="file" id="fileUrlInput" value="${escapeHtml(currentFile)}" />
-        <p class="text-xs text-slate-500 mt-1">Upload gambar baru, atau biarkan kosong kalau gak mau ganti.</p>
+        <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 block">Nama File (di folder Assets/)</label>
+        <input type="text" name="file" required value="${escapeHtml(data?.file || "")}" placeholder="IMG_20260730_135710.jpg" class="w-full bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-500 transition-all" />
+        <p class="text-xs text-slate-500 mt-1">File harus ada di folder <code class="bg-slate-800 px-1.5 py-0.5 rounded">Assets/</code></p>
       </div>
-
       <div>
         <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 block">Kategori</label>
         <select name="kategori" class="w-full bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-500 transition-all">
@@ -456,92 +460,6 @@ function openModal(type, data = null) {
   }
 
   formFields.innerHTML = fields;
-
-  // ============ SETUP UPLOAD GAMBAR (khusus galeri) ============
-  if (type === "galeri") {
-    const uploadArea = document.getElementById("uploadArea");
-    const fileInput = document.getElementById("fileInput");
-    const uploadPrompt = document.getElementById("uploadPrompt");
-    const uploadPreview = document.getElementById("uploadPreview");
-    const previewImg = document.getElementById("previewImg");
-    const uploadStatus = document.getElementById("uploadStatus");
-    const fileUrlInput = document.getElementById("fileUrlInput");
-
-    uploadArea.addEventListener("click", () => fileInput.click());
-
-    uploadArea.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      uploadArea.classList.add("border-brand-500", "bg-brand-500/5");
-    });
-    uploadArea.addEventListener("dragleave", () => {
-      uploadArea.classList.remove("border-brand-500", "bg-brand-500/5");
-    });
-    uploadArea.addEventListener("drop", (e) => {
-      e.preventDefault();
-      uploadArea.classList.remove("border-brand-500", "bg-brand-500/5");
-      if (e.dataTransfer.files.length) {
-        fileInput.files = e.dataTransfer.files;
-        handleFileUpload(e.dataTransfer.files[0]);
-      }
-    });
-
-    fileInput.addEventListener("change", (e) => {
-      if (e.target.files.length) {
-        handleFileUpload(e.target.files[0]);
-      }
-    });
-
-    async function handleFileUpload(file) {
-      if (file.size > 5 * 1024 * 1024) {
-        uploadStatus.className = "text-xs mt-2 text-rose-400";
-        uploadStatus.textContent = "❌ File terlalu besar. Max 5MB.";
-        uploadStatus.classList.remove("hidden");
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        previewImg.src = e.target.result;
-        uploadPrompt.classList.add("hidden");
-        uploadPreview.classList.remove("hidden");
-      };
-      reader.readAsDataURL(file);
-
-      uploadStatus.className = "text-xs mt-2 text-brand-500";
-      uploadStatus.innerHTML =
-        '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
-      uploadStatus.classList.remove("hidden");
-
-      const formDataObj = new FormData();
-      formDataObj.append("image", file);
-
-      try {
-        const res = await fetch(`${API_URL}/api/upload`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formDataObj,
-        });
-
-        const result = await res.json();
-
-        if (!res.ok || !result.success) {
-          throw new Error(result.message || "Upload gagal");
-        }
-
-        fileUrlInput.value = result.url;
-
-        uploadStatus.className = "text-xs mt-2 text-brand-500";
-        uploadStatus.innerHTML =
-          '<i class="fa-solid fa-circle-check"></i> Gambar berhasil diupload!';
-      } catch (err) {
-        console.error(err);
-        uploadStatus.className = "text-xs mt-2 text-rose-400";
-        uploadStatus.innerHTML = `❌ ${err.message}`;
-      }
-    }
-  }
 
   // Show modal
   modal.classList.remove("hidden");
@@ -565,14 +483,12 @@ function closeModal() {
   }, 300);
 }
 
-// ============================================
-// SUBMIT FORM
-// ============================================
+// Submit form
 modalForm?.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const formDataObj = new FormData(modalForm);
-  const data = Object.fromEntries(formDataObj.entries());
+  const formData = new FormData(modalForm);
+  const data = Object.fromEntries(formData.entries());
 
   const url = currentId
     ? `${API_URL}/api/${currentType}/${currentId}`
@@ -600,6 +516,7 @@ modalForm?.addEventListener("submit", async (e) => {
     );
     closeModal();
 
+    // Reload list
     if (currentType === "testimoni") loadTestimoni();
     if (currentType === "agenda") loadAgenda();
     if (currentType === "galeri") loadGaleri();
@@ -610,7 +527,7 @@ modalForm?.addEventListener("submit", async (e) => {
 });
 
 // ============================================
-// EDIT FUNCTIONS
+// EDIT FUNCTIONS (dipanggil dari onclick)
 // ============================================
 window.editTestimoni = async (id) => {
   const res = await fetch(`${API_URL}/api/testimoni`);

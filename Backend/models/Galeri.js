@@ -17,6 +17,10 @@ const galeriSchema = new mongoose.Schema(
       required: [true, "Nama file wajib diisi"],
       trim: true,
     },
+    public_id: {
+      type: String,
+      default: null,
+    },
     kategori: {
       type: String,
       enum: ["edukasi", "ikan", "panen", "lainnya"],

@@ -283,7 +283,6 @@ async function loadGaleri() {
 
     container.innerHTML = data
       .map((item) => {
-        // Detect apakah file URL atau nama file lokal
         const isUrl = item.file.startsWith("http");
         const imgSrc = isUrl ? item.file : `Assets/${escapeHtml(item.file)}`;
 
@@ -411,6 +410,7 @@ function openModal(type, data = null) {
   // ============ FORM GALERI (DENGAN UPLOAD) ============
   if (type === "galeri") {
     const currentFile = data?.file || "";
+    const currentPublicId = data?.public_id || "";
     const isUrl = currentFile.startsWith("http");
     const previewSrc = isUrl
       ? currentFile
@@ -440,6 +440,7 @@ function openModal(type, data = null) {
         </div>
         <div id="uploadStatus" class="text-xs mt-2 hidden"></div>
         <input type="hidden" name="file" id="fileUrlInput" value="${escapeHtml(currentFile)}" />
+        <input type="hidden" name="public_id" id="publicIdInput" value="${escapeHtml(currentPublicId)}" />
         <p class="text-xs text-slate-500 mt-1">Upload gambar baru, atau biarkan kosong kalau gak mau ganti.</p>
       </div>
 
@@ -466,6 +467,7 @@ function openModal(type, data = null) {
     const previewImg = document.getElementById("previewImg");
     const uploadStatus = document.getElementById("uploadStatus");
     const fileUrlInput = document.getElementById("fileUrlInput");
+    const publicIdInput = document.getElementById("publicIdInput");
 
     uploadArea.addEventListener("click", () => fileInput.click());
 
@@ -531,6 +533,7 @@ function openModal(type, data = null) {
         }
 
         fileUrlInput.value = result.url;
+        publicIdInput.value = result.public_id;
 
         uploadStatus.className = "text-xs mt-2 text-brand-500";
         uploadStatus.innerHTML =

@@ -15,7 +15,6 @@ const upload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // max 5 MB
   fileFilter: (req, file, cb) => {
-    // Cek ekstensi file (lebih fleksibel dari mimetype)
     const allowedExt = /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i;
     if (allowedExt.test(file.originalname)) {
       cb(null, true);

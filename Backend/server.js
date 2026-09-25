@@ -1,12 +1,13 @@
 // ============================================
 // BACKEND — Sentra Mina Argo Mekarmukti
-// Fase 4: API + Auth (JWT)
+// Fase 4: API + Auth (JWT) + Upload Cloudinary
 // ============================================
 
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const connectDB = require("./config/database");
+const cloudinary = require("./config/cloudinary");
 
 // Import models
 const Profil = require("./models/Profil");
@@ -17,6 +18,7 @@ const Galeri = require("./models/Galeri");
 // Import routes
 const authRoutes = require("./routes/auth");
 const uploadRoutes = require("./routes/upload");
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -24,23 +26,19 @@ const PORT = process.env.PORT || 3000;
 // MIDDLEWARE
 // ============================================
 
-app.use(cors()); // Izinkan akses dari frontend (CORS)
-app.use(express.json()); // Baca JSON dari request body
+app.use(cors());
+app.use(express.json());
 
-// Logger: catat setiap request di terminal
+// Logger
 app.use((req, res, next) => {
   console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
   next();
 });
 
 // ============================================
-// AUTH ROUTES
+// AUTH & UPLOAD ROUTES
 // ============================================
 app.use("/api/auth", authRoutes);
-
-// ============================================
-// UPLOAD ROUTES
-// ============================================
 app.use("/api/upload", uploadRoutes);
 
 // ============================================
@@ -52,11 +50,10 @@ app.get("/", (req, res) => {
   res.json({
     message: "API Sentra Mina Argo Mekarmukti — Connected to MongoDB",
     endpoints: {
-      // Auth
       register: "POST /api/auth/register",
       login: "POST /api/auth/login",
       me: "GET /api/auth/me",
-      // Content
+      upload: "POST /api/upload",
       profil: "GET /api/profil",
       agenda: "GET /api/agenda",
       agendaDetail: "GET /api/agenda/:id",
@@ -224,7 +221,7 @@ app.post("/api/testimoni", async (req, res) => {
 // POST /api/galeri
 app.post("/api/galeri", async (req, res) => {
   try {
-    const { judul, file, kategori } = req.body;
+    const { judul, file, public_id, kategori } = req.body;
 
     if (!judul || !file) {
       return res.status(400).json({
@@ -236,6 +233,7 @@ app.post("/api/galeri", async (req, res) => {
     const galeriBaru = await Galeri.create({
       judul,
       file,
+      public_id: public_id || null,
       kategori,
     });
 
@@ -303,11 +301,14 @@ app.put("/api/testimoni/:id", async (req, res) => {
 // PUT /api/galeri/:id
 app.put("/api/galeri/:id", async (req, res) => {
   try {
-    const { judul, file, kategori } = req.body;
+    const { judul, file, kategori, public_id } = req.body;
+
+    const updateData = { judul, file, kategori };
+    if (public_id) updateData.public_id = public_id;
 
     const galeriUpdate = await Galeri.findByIdAndUpdate(
       req.params.id,
-      { judul, file, kategori },
+      updateData,
       { new: true, runValidators: true },
     );
 
@@ -364,13 +365,23 @@ app.delete("/api/testimoni/:id", async (req, res) => {
   }
 });
 
-// DELETE /api/galeri/:id
+// DELETE /api/galeri/:id — + auto-hapus Cloudinary
 app.delete("/api/galeri/:id", async (req, res) => {
   try {
     const galeriHapus = await Galeri.findByIdAndDelete(req.params.id);
 
     if (!galeriHapus) {
       return res.status(404).json({ error: "Galeri tidak ditemukan" });
+    }
+
+    // Kalau ada public_id → hapus juga di Cloudinary
+    if (galeriHapus.public_id) {
+      try {
+        await cloudinary.uploader.destroy(galeriHapus.public_id);
+        console.log(`🗑️ Cloudinary: ${galeriHapus.public_id} dihapus`);
+      } catch (cloudErr) {
+        console.error("⚠️ Gagal hapus di Cloudinary:", cloudErr.message);
+      }
     }
 
     res.json({
@@ -402,24 +413,25 @@ app.listen(PORT, () => {
   console.log(`✅ Server jalan di http://localhost:${PORT}`);
   console.log("========================================");
   console.log("🔐 AUTH:");
-  console.log(`   POST   http://localhost:${PORT}/api/auth/register`);
-  console.log(`   POST   http://localhost:${PORT}/api/auth/login`);
-  console.log(`   GET    http://localhost:${PORT}/api/auth/me`);
-  console.log("========================================");
+  console.log(`   POST   /api/auth/register`);
+  console.log(`   POST   /api/auth/login`);
+  console.log(`   GET    /api/auth/me`);
+  console.log("📤 UPLOAD:");
+  console.log(`   POST   /api/upload`);
   console.log("🌐 CONTENT:");
-  console.log(`   GET    http://localhost:${PORT}/api/profil`);
-  console.log(`   GET    http://localhost:${PORT}/api/agenda`);
-  console.log(`   POST   http://localhost:${PORT}/api/agenda`);
-  console.log(`   PUT    http://localhost:${PORT}/api/agenda/:id`);
-  console.log(`   DELETE http://localhost:${PORT}/api/agenda/:id`);
-  console.log(`   GET    http://localhost:${PORT}/api/testimoni`);
-  console.log(`   POST   http://localhost:${PORT}/api/testimoni`);
-  console.log(`   PUT    http://localhost:${PORT}/api/testimoni/:id`);
-  console.log(`   DELETE http://localhost:${PORT}/api/testimoni/:id`);
-  console.log(`   GET    http://localhost:${PORT}/api/galeri`);
-  console.log(`   POST   http://localhost:${PORT}/api/galeri`);
-  console.log(`   PUT    http://localhost:${PORT}/api/galeri/:id`);
-  console.log(`   DELETE http://localhost:${PORT}/api/galeri/:id`);
-  console.log(`   GET    http://localhost:${PORT}/api/statistik`);
+  console.log(`   GET    /api/profil`);
+  console.log(`   GET    /api/agenda`);
+  console.log(`   POST   /api/agenda`);
+  console.log(`   PUT    /api/agenda/:id`);
+  console.log(`   DELETE /api/agenda/:id`);
+  console.log(`   GET    /api/testimoni`);
+  console.log(`   POST   /api/testimoni`);
+  console.log(`   PUT    /api/testimoni/:id`);
+  console.log(`   DELETE /api/testimoni/:id`);
+  console.log(`   GET    /api/galeri`);
+  console.log(`   POST   /api/galeri`);
+  console.log(`   PUT    /api/galeri/:id`);
+  console.log(`   DELETE /api/galeri/:id  (auto-hapus Cloudinary)`);
+  console.log(`   GET    /api/statistik`);
   console.log("========================================");
 });

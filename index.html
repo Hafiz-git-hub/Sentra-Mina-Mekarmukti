@@ -78,7 +78,7 @@
       <div
         class="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center"
       >
-        <!-- LOGO (tanpa kotak wrapper) -->
+        <!-- LOGO -->
         <a href="#" class="flex items-center gap-3 group">
           <img
             src="Assets/favicon-96x96.png"
@@ -263,6 +263,22 @@
           Kawasan terpadu perikanan dan pertanian ramah lingkungan yang
           mengintegrasikan edukasi, inovasi, dan pemberdayaan masyarakat lokal.
         </p>
+
+        <!-- WEATHER WIDGET -->
+        <div
+          class="reveal mt-8 inline-flex items-center gap-3 bg-slate-800/40 border border-slate-700/60 backdrop-blur-sm px-5 py-3 rounded-2xl shadow-lg"
+        >
+          <i class="weather-icon fa-solid fa-cloud text-cyan-400 text-2xl"></i>
+          <div class="text-left">
+            <div class="flex items-baseline gap-2">
+              <span class="weather-temp text-xl font-bold text-white"
+                >--°C</span
+              >
+              <span class="weather-desc text-sm text-slate-300">Memuat...</span>
+            </div>
+            <div class="weather-detail text-xs text-slate-500 mt-0.5">--</div>
+          </div>
+        </div>
 
         <div class="reveal mt-10 flex flex-wrap justify-center gap-4">
           <a
@@ -521,7 +537,6 @@
         </div>
 
         <div id="galeriGrid" class="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
-          <!-- Fallback: foto statis yang muncul sebelum JS load -->
           <div
             class="reveal gallery-item cursor-pointer overflow-hidden rounded-2xl border border-slate-800 group relative aspect-[4/5]"
           >
@@ -614,7 +629,6 @@
             class="fa-solid fa-quote-left absolute top-6 left-6 text-6xl text-brand-500/10 pointer-events-none"
           ></i>
 
-          <!-- Fallback slide — akan diganti oleh JS -->
           <div
             class="testi-slide transition-all duration-500 absolute inset-0 p-8 md:p-12 flex flex-col justify-center"
           >
@@ -873,8 +887,8 @@
       class="bg-slate-950 text-slate-500 py-10 text-center text-xs border-t border-slate-800/80"
     >
       <p>
-        &copy; 2026 Sentra Mina & Tani Mekarmukti. Portal Informasi & Showcase
-        Budidaya.
+        &copy; 2026 Sentra Mina Argo Mekarmukti. Portal Informasi Perikanan &
+        Pertanian Terpadu.
       </p>
     </footer>
 
@@ -1077,6 +1091,8 @@
       </div>
     </nav>
 
+    <!-- SCRIPTS -->
     <script src="JS/main.js"></script>
+    <script src="JS/weather.js"></script>
   </body>
 </html>

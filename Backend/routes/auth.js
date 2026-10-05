@@ -7,16 +7,33 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const rateLimit = require("express-rate-limit");
 
 const User = require("../models/user");
 const authMiddleware = require("../middleware/auth");
 
 // ============================================
-// POST /api/auth/register — Daftar user baru
+// RATE LIMIT — cegah brute force login
 // ============================================
-router.post("/register", async (req, res) => {
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 menit
+  max: 5, // max 5 percobaan per IP
+  message: {
+    success: false,
+    message: "Terlalu banyak percobaan login. Coba lagi 15 menit lagi.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// ============================================
+// POST /api/auth/register — Daftar user baru
+// 🔒 BUTUH TOKEN ADMIN — cuma admin yang bisa nambah admin
+// ============================================
+router.post("/register", authMiddleware, async (req, res) => {
   try {
-    const { email, password, nama, role } = req.body;
+    const { email, password, nama } = req.body;
+    // ⚠️ role TIDAK diambil dari req.body — dipaksa "admin"
 
     // Validasi input
     if (!email || !password || !nama) {
@@ -26,8 +43,25 @@ router.post("/register", async (req, res) => {
       });
     }
 
+    // Validasi panjang password SEBELUM hash
+    if (password.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: "Password minimal 6 karakter",
+      });
+    }
+
+    // Validasi format email sederhana
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Format email tidak valid",
+      });
+    }
+
     // Cek email udah terdaftar?
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -39,12 +73,12 @@ router.post("/register", async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Bikin user baru
+    // Bikin user baru — role DIPAKSA "admin"
     const user = await User.create({
-      email,
+      email: email.toLowerCase(),
       password: hashedPassword,
       nama,
-      role: role || "admin",
+      role: "admin",
     });
 
     res.status(201).json({
@@ -58,17 +92,19 @@ router.post("/register", async (req, res) => {
       },
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Terjadi kesalahan pada server",
     });
   }
 });
 
 // ============================================
 // POST /api/auth/login — Login user
+// 🛡️ Rate limit: max 5 percobaan per 15 menit
 // ============================================
-router.post("/login", async (req, res) => {
+router.post("/login", loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -81,7 +117,7 @@ router.post("/login", async (req, res) => {
     }
 
     // Cari user berdasarkan email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -98,11 +134,11 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // Generate JWT token
+    // Generate JWT token — expiry 1 hari
     const token = jwt.sign(
       { id: user._id, email: user.email, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "7d" } // token valid 7 hari
+      { expiresIn: "1d" },
     );
 
     res.json({
@@ -117,9 +153,10 @@ router.post("/login", async (req, res) => {
       },
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Terjadi kesalahan pada server",
     });
   }
 });
@@ -141,9 +178,10 @@ router.get("/me", authMiddleware, async (req, res) => {
       user,
     });
   } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Terjadi kesalahan pada server",
     });
   }
 });

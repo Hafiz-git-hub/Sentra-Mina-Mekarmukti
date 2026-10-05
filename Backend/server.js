@@ -1,6 +1,6 @@
 // ============================================
 // BACKEND — Sentra Mina Argo Mekarmukti
-// Fase 4: API + Auth (JWT) + Upload Cloudinary
+// Fase 5: API + Auth + Upload + Security
 // ============================================
 
 require("dotenv").config();
@@ -14,10 +14,12 @@ const Profil = require("./models/Profil");
 const Agenda = require("./models/Agenda");
 const Testimoni = require("./models/Testimoni");
 const Galeri = require("./models/Galeri");
+const Statistik = require("./models/Statistik");
 
-// Import routes
+// Import routes & middleware
 const authRoutes = require("./routes/auth");
 const uploadRoutes = require("./routes/upload");
+const authMiddleware = require("./middleware/auth");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -26,8 +28,19 @@ const PORT = process.env.PORT || 3000;
 // MIDDLEWARE
 // ============================================
 
-app.use(cors());
-app.use(express.json());
+app.use(
+  cors({
+    origin: [
+      "https://sentra-mina-mekarmukti.vercel.app",
+      "http://localhost:5500",
+      "http://127.0.0.1:5500",
+      "http://localhost:3000",
+    ],
+    credentials: true,
+  }),
+);
+
+app.use(express.json({ limit: "10mb" }));
 
 // Logger
 app.use((req, res, next) => {
@@ -42,7 +55,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
 
 // ============================================
-// ENDPOINTS — GET (Read)
+// ENDPOINTS — GET (Read) — PUBLIK
 // ============================================
 
 // 1. Root
@@ -74,7 +87,8 @@ app.get("/api/profil", async (req, res) => {
     }
     res.json(profil);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    res.status(500).json({ error: "Terjadi kesalahan pada server" });
   }
 });
 
@@ -84,7 +98,8 @@ app.get("/api/agenda", async (req, res) => {
     const agenda = await Agenda.find().sort({ tanggal: 1 });
     res.json(agenda);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    res.status(500).json({ error: "Terjadi kesalahan pada server" });
   }
 });
 
@@ -97,7 +112,8 @@ app.get("/api/agenda/:id", async (req, res) => {
     }
     res.json(agenda);
   } catch (error) {
-    res.status(400).json({ error: "ID tidak valid", detail: error.message });
+    console.error(error);
+    res.status(400).json({ error: "ID tidak valid" });
   }
 });
 
@@ -107,7 +123,8 @@ app.get("/api/testimoni", async (req, res) => {
     const testimoni = await Testimoni.find();
     res.json(testimoni);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    res.status(500).json({ error: "Terjadi kesalahan pada server" });
   }
 });
 
@@ -133,36 +150,47 @@ app.get("/api/galeri", async (req, res) => {
 
     res.json(galeri);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    res.status(500).json({ error: "Terjadi kesalahan pada server" });
   }
 });
 
-// 7. STATISTIK
+// 7. STATISTIK — publik (read only)
 app.get("/api/statistik", async (req, res) => {
   try {
     const jumlahAgenda = await Agenda.countDocuments();
     const jumlahTestimoni = await Testimoni.countDocuments();
     const jumlahGaleri = await Galeri.countDocuments();
 
+    let statistik = await Statistik.findOne();
+    if (!statistik) {
+      statistik = await Statistik.create({
+        kolamAktif: 15,
+        panenPerBulan: 500,
+        pengunjung: 200,
+      });
+    }
+
     res.json({
-      kolamAktif: 15,
-      panenPerBulan: 500,
-      pengunjung: 200,
+      kolamAktif: statistik.kolamAktif,
+      panenPerBulan: statistik.panenPerBulan,
+      pengunjung: statistik.pengunjung,
       totalAgenda: jumlahAgenda,
       totalTestimoni: jumlahTestimoni,
       totalGaleri: jumlahGaleri,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    res.status(500).json({ error: "Terjadi kesalahan pada server" });
   }
 });
 
 // ============================================
-// ENDPOINTS — POST (Create)
+// ENDPOINTS — POST (Create) — BUTUH AUTH
 // ============================================
 
 // POST /api/agenda
-app.post("/api/agenda", async (req, res) => {
+app.post("/api/agenda", authMiddleware, async (req, res) => {
   try {
     const { judul, tanggal, lokasi, deskripsi, kategori } = req.body;
 
@@ -186,12 +214,13 @@ app.post("/api/agenda", async (req, res) => {
       data: agendaBaru,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    res.status(500).json({ error: "Gagal menambahkan agenda" });
   }
 });
 
 // POST /api/testimoni
-app.post("/api/testimoni", async (req, res) => {
+app.post("/api/testimoni", authMiddleware, async (req, res) => {
   try {
     const { nama, peran, pesan, inisial } = req.body;
 
@@ -214,12 +243,13 @@ app.post("/api/testimoni", async (req, res) => {
       data: testimoniBaru,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    res.status(500).json({ error: "Gagal menambahkan testimoni" });
   }
 });
 
 // POST /api/galeri
-app.post("/api/galeri", async (req, res) => {
+app.post("/api/galeri", authMiddleware, async (req, res) => {
   try {
     const { judul, file, public_id, kategori } = req.body;
 
@@ -242,16 +272,17 @@ app.post("/api/galeri", async (req, res) => {
       data: galeriBaru,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error(error);
+    res.status(500).json({ error: "Gagal menambahkan galeri" });
   }
 });
 
 // ============================================
-// ENDPOINTS — PUT (Update)
+// ENDPOINTS — PUT (Update) — BUTUH AUTH
 // ============================================
 
 // PUT /api/agenda/:id
-app.put("/api/agenda/:id", async (req, res) => {
+app.put("/api/agenda/:id", authMiddleware, async (req, res) => {
   try {
     const { judul, tanggal, lokasi, deskripsi, kategori } = req.body;
 
@@ -270,12 +301,13 @@ app.put("/api/agenda/:id", async (req, res) => {
       data: agendaUpdate,
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error(error);
+    res.status(400).json({ error: "Gagal update agenda" });
   }
 });
 
 // PUT /api/testimoni/:id
-app.put("/api/testimoni/:id", async (req, res) => {
+app.put("/api/testimoni/:id", authMiddleware, async (req, res) => {
   try {
     const { nama, peran, pesan, inisial } = req.body;
 
@@ -294,12 +326,13 @@ app.put("/api/testimoni/:id", async (req, res) => {
       data: testimoniUpdate,
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error(error);
+    res.status(400).json({ error: "Gagal update testimoni" });
   }
 });
 
 // PUT /api/galeri/:id
-app.put("/api/galeri/:id", async (req, res) => {
+app.put("/api/galeri/:id", authMiddleware, async (req, res) => {
   try {
     const { judul, file, kategori, public_id } = req.body;
 
@@ -321,16 +354,55 @@ app.put("/api/galeri/:id", async (req, res) => {
       data: galeriUpdate,
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error(error);
+    res.status(400).json({ error: "Gagal update galeri" });
+  }
+});
+
+// PUT /api/statistik
+app.put("/api/statistik", authMiddleware, async (req, res) => {
+  try {
+    const { kolamAktif, panenPerBulan, pengunjung } = req.body;
+
+    if (
+      (kolamAktif !== undefined && (isNaN(kolamAktif) || kolamAktif < 0)) ||
+      (panenPerBulan !== undefined &&
+        (isNaN(panenPerBulan) || panenPerBulan < 0)) ||
+      (pengunjung !== undefined && (isNaN(pengunjung) || pengunjung < 0))
+    ) {
+      return res.status(400).json({
+        error: "Data harus berupa angka positif",
+      });
+    }
+
+    let statistik = await Statistik.findOne();
+    if (!statistik) {
+      statistik = new Statistik();
+    }
+
+    if (kolamAktif !== undefined) statistik.kolamAktif = kolamAktif;
+    if (panenPerBulan !== undefined) statistik.panenPerBulan = panenPerBulan;
+    if (pengunjung !== undefined) statistik.pengunjung = pengunjung;
+
+    await statistik.save();
+
+    res.json({
+      success: true,
+      message: "✅ Statistik berhasil diupdate",
+      data: statistik,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Gagal update statistik" });
   }
 });
 
 // ============================================
-// ENDPOINTS — DELETE (Hapus)
+// ENDPOINTS — DELETE (Hapus) — BUTUH AUTH
 // ============================================
 
 // DELETE /api/agenda/:id
-app.delete("/api/agenda/:id", async (req, res) => {
+app.delete("/api/agenda/:id", authMiddleware, async (req, res) => {
   try {
     const agendaHapus = await Agenda.findByIdAndDelete(req.params.id);
 
@@ -343,12 +415,13 @@ app.delete("/api/agenda/:id", async (req, res) => {
       data: agendaHapus,
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error(error);
+    res.status(400).json({ error: "Gagal hapus agenda" });
   }
 });
 
 // DELETE /api/testimoni/:id
-app.delete("/api/testimoni/:id", async (req, res) => {
+app.delete("/api/testimoni/:id", authMiddleware, async (req, res) => {
   try {
     const testimoniHapus = await Testimoni.findByIdAndDelete(req.params.id);
 
@@ -361,12 +434,13 @@ app.delete("/api/testimoni/:id", async (req, res) => {
       data: testimoniHapus,
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error(error);
+    res.status(400).json({ error: "Gagal hapus testimoni" });
   }
 });
 
 // DELETE /api/galeri/:id — + auto-hapus Cloudinary
-app.delete("/api/galeri/:id", async (req, res) => {
+app.delete("/api/galeri/:id", authMiddleware, async (req, res) => {
   try {
     const galeriHapus = await Galeri.findByIdAndDelete(req.params.id);
 
@@ -374,7 +448,6 @@ app.delete("/api/galeri/:id", async (req, res) => {
       return res.status(404).json({ error: "Galeri tidak ditemukan" });
     }
 
-    // Kalau ada public_id → hapus juga di Cloudinary
     if (galeriHapus.public_id) {
       try {
         await cloudinary.uploader.destroy(galeriHapus.public_id);
@@ -389,7 +462,8 @@ app.delete("/api/galeri/:id", async (req, res) => {
       data: galeriHapus,
     });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error(error);
+    res.status(400).json({ error: "Gagal hapus galeri" });
   }
 });
 
@@ -399,8 +473,6 @@ app.delete("/api/galeri/:id", async (req, res) => {
 app.use((req, res) => {
   res.status(404).json({
     error: "Endpoint tidak ditemukan",
-    path: req.originalUrl,
-    hint: "Cek daftar endpoint di http://localhost:3000/",
   });
 });
 
@@ -416,22 +488,23 @@ app.listen(PORT, () => {
   console.log(`   POST   /api/auth/register`);
   console.log(`   POST   /api/auth/login`);
   console.log(`   GET    /api/auth/me`);
-  console.log("📤 UPLOAD:");
+  console.log("📤 UPLOAD [🔒]:");
   console.log(`   POST   /api/upload`);
-  console.log("🌐 CONTENT:");
+  console.log("🌐 CONTENT (GET publik, POST/PUT/DELETE 🔒):");
   console.log(`   GET    /api/profil`);
   console.log(`   GET    /api/agenda`);
-  console.log(`   POST   /api/agenda`);
-  console.log(`   PUT    /api/agenda/:id`);
-  console.log(`   DELETE /api/agenda/:id`);
+  console.log(`   POST   /api/agenda       [🔒]`);
+  console.log(`   PUT    /api/agenda/:id   [🔒]`);
+  console.log(`   DELETE /api/agenda/:id   [🔒]`);
   console.log(`   GET    /api/testimoni`);
-  console.log(`   POST   /api/testimoni`);
-  console.log(`   PUT    /api/testimoni/:id`);
-  console.log(`   DELETE /api/testimoni/:id`);
+  console.log(`   POST   /api/testimoni    [🔒]`);
+  console.log(`   PUT    /api/testimoni/:id [🔒]`);
+  console.log(`   DELETE /api/testimoni/:id [🔒]`);
   console.log(`   GET    /api/galeri`);
-  console.log(`   POST   /api/galeri`);
-  console.log(`   PUT    /api/galeri/:id`);
-  console.log(`   DELETE /api/galeri/:id  (auto-hapus Cloudinary)`);
+  console.log(`   POST   /api/galeri       [🔒]`);
+  console.log(`   PUT    /api/galeri/:id   [🔒]`);
+  console.log(`   DELETE /api/galeri/:id   [🔒 + Cloudinary]`);
   console.log(`   GET    /api/statistik`);
+  console.log(`   PUT    /api/statistik    [🔒]`);
   console.log("========================================");
 });

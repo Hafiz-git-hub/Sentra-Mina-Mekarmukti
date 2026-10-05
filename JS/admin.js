@@ -15,7 +15,6 @@ if (!token) {
   window.location.href = "index.html";
 }
 
-// Tampilkan nama user
 document.addEventListener("DOMContentLoaded", () => {
   const userNameEl = document.getElementById("userName");
   if (userNameEl && user.nama) {
@@ -30,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ============================================
-// TOAST NOTIFICATION
+// TOAST
 // ============================================
 function showToast(message, type = "info") {
   const container = document.getElementById("toastContainer");
@@ -63,7 +62,7 @@ function showToast(message, type = "info") {
 }
 
 // ============================================
-// HELPER: Escape HTML
+// ESCAPE HTML
 // ============================================
 function escapeHtml(str) {
   return String(str || "")
@@ -99,6 +98,7 @@ function switchPage(menu) {
   if (menu === "testimoni") loadTestimoni();
   if (menu === "agenda") loadAgenda();
   if (menu === "galeri") loadGaleri();
+  if (menu === "statistik") loadStatistik();
   if (menu === "dashboard") loadDashboard();
 }
 
@@ -149,6 +149,61 @@ async function loadDashboard() {
     console.error("Gagal load statistik:", err);
   }
 }
+
+// ============================================
+// STATISTIK
+// ============================================
+async function loadStatistik() {
+  try {
+    const res = await fetch(`${API_URL}/api/statistik`);
+    const data = await res.json();
+
+    const form = document.getElementById("statistikForm");
+    if (!form) return;
+
+    form.kolamAktif.value = data.kolamAktif ?? 0;
+    form.panenPerBulan.value = data.panenPerBulan ?? 0;
+    form.pengunjung.value = data.pengunjung ?? 0;
+  } catch (err) {
+    console.error("Gagal load statistik:", err);
+  }
+}
+
+document
+  .getElementById("statistikForm")
+  ?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+    const data = {
+      kolamAktif: parseInt(formData.get("kolamAktif")),
+      panenPerBulan: parseInt(formData.get("panenPerBulan")),
+      pengunjung: parseInt(formData.get("pengunjung")),
+    };
+
+    try {
+      const res = await fetch(`${API_URL}/api/statistik`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        showToast(result.error || "Gagal menyimpan", "error");
+        return;
+      }
+
+      showToast("✅ Statistik berhasil diupdate", "success");
+    } catch (err) {
+      console.error(err);
+      showToast("Gagal terhubung ke server", "error");
+    }
+  });
 
 // ============================================
 // TESTIMONI
@@ -284,7 +339,9 @@ async function loadGaleri() {
     container.innerHTML = data
       .map((item) => {
         const isUrl = item.file.startsWith("http");
-        const imgSrc = isUrl ? item.file : `Assets/${escapeHtml(item.file)}`;
+        const imgSrc = isUrl
+          ? escapeHtml(item.file)
+          : `Assets/${escapeHtml(item.file)}`;
 
         return `
       <div class="bg-slate-800/40 border border-slate-800 rounded-2xl overflow-hidden hover:border-slate-700 transition-all group">
@@ -317,7 +374,7 @@ async function loadGaleri() {
 }
 
 // ============================================
-// MODAL — Form Tambah/Edit
+// MODAL
 // ============================================
 const modal = document.getElementById("modal");
 const modalForm = document.getElementById("modalForm");
@@ -352,7 +409,6 @@ function openModal(type, data = null) {
 
   let fields = "";
 
-  // ============ FORM TESTIMONI ============
   if (type === "testimoni") {
     fields = `
       <div>
@@ -374,7 +430,6 @@ function openModal(type, data = null) {
     `;
   }
 
-  // ============ FORM AGENDA ============
   if (type === "agenda") {
     fields = `
       <div>
@@ -407,7 +462,6 @@ function openModal(type, data = null) {
     `;
   }
 
-  // ============ FORM GALERI (DENGAN UPLOAD) ============
   if (type === "galeri") {
     const currentFile = data?.file || "";
     const currentPublicId = data?.public_id || "";
@@ -458,7 +512,6 @@ function openModal(type, data = null) {
 
   formFields.innerHTML = fields;
 
-  // ============ SETUP UPLOAD GAMBAR (khusus galeri) ============
   if (type === "galeri") {
     const uploadArea = document.getElementById("uploadArea");
     const fileInput = document.getElementById("fileInput");
@@ -546,7 +599,6 @@ function openModal(type, data = null) {
     }
   }
 
-  // Show modal
   modal.classList.remove("hidden");
   modal.classList.add("flex");
   requestAnimationFrame(() => {
@@ -613,7 +665,7 @@ modalForm?.addEventListener("submit", async (e) => {
 });
 
 // ============================================
-// EDIT FUNCTIONS
+// EDIT
 // ============================================
 window.editTestimoni = async (id) => {
   const res = await fetch(`${API_URL}/api/testimoni`);
@@ -637,7 +689,7 @@ window.editGaleri = async (id) => {
 };
 
 // ============================================
-// DELETE FUNCTION
+// DELETE
 // ============================================
 window.deleteItem = async (type, id) => {
   if (!confirm(`Yakin mau hapus ${type} ini?`)) return;
@@ -645,6 +697,9 @@ window.deleteItem = async (type, id) => {
   try {
     const res = await fetch(`${API_URL}/api/${type}/${id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (!res.ok) {

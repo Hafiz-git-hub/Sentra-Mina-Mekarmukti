@@ -12,6 +12,18 @@ document.addEventListener("DOMContentLoaded", () => {
   let isOpen = false;
 
   /* ============================================
+     HELPER: Escape HTML — cegah XSS
+     ============================================ */
+  function escapeHtml(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  /* ============================================
      1. JAM & TANGGAL REAL-TIME
      ============================================ */
   function updateClock() {
@@ -231,38 +243,7 @@ document.addEventListener("DOMContentLoaded", () => {
   attachLightboxEvents();
 
   /* ============================================
-     9. COUNTER ANIMATION
-     ============================================ */
-  const counters = document.querySelectorAll(".counter");
-  const counterObserver = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const el = entry.target;
-          const target = +el.dataset.target;
-          const suffix = el.dataset.suffix || "";
-          let current = 0;
-          const step = target / 50;
-          const tick = () => {
-            current += step;
-            if (current < target) {
-              el.textContent = Math.floor(current) + suffix;
-              requestAnimationFrame(tick);
-            } else {
-              el.textContent = target + suffix;
-            }
-          };
-          tick();
-          counterObserver.unobserve(el);
-        }
-      });
-    },
-    { threshold: 0.5 },
-  );
-  counters.forEach((c) => counterObserver.observe(c));
-
-  /* ============================================
-     10. TYPING EFFECT
+     9. TYPING EFFECT
      ============================================ */
   const typingEl = document.getElementById("typingText");
   if (typingEl) {
@@ -300,7 +281,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ============================================
-     11. CARD 3D TILT
+     10. CARD 3D TILT
      ============================================ */
   document.querySelectorAll(".tilt-card").forEach((card) => {
     card.addEventListener("mousemove", (e) => {
@@ -320,7 +301,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   /* ============================================
-     12. PARALLAX HERO BG
+     11. PARALLAX HERO BG
      ============================================ */
   const heroBlob = document.getElementById("heroBlob");
   const heroSection = document.getElementById("heroSection");
@@ -332,7 +313,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ============================================
-     13. TESTIMONI SLIDER
+     12. TESTIMONI SLIDER
      ============================================ */
   function initTestimoniSlider() {
     const newSlides = document.querySelectorAll(".testi-slide");
@@ -379,7 +360,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ============================================
-     14. MOBILE BOTTOM NAV
+     13. MOBILE BOTTOM NAV
      ============================================ */
   const bottomNav = document.getElementById("bottomNav");
   if (bottomNav) {
@@ -396,7 +377,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ============================================
-     15. MODAL LOGIN
+     14. MODAL LOGIN
      ============================================ */
   const loginModal = document.getElementById("loginModal");
   const loginBtn = document.getElementById("loginBtn");
@@ -544,7 +525,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ============================================
-     16. TOAST NOTIFICATION
+     15. TOAST NOTIFICATION
      ============================================ */
   function showToast(message, type = "info") {
     let toastContainer = document.getElementById("toastContainer");
@@ -571,7 +552,7 @@ document.addEventListener("DOMContentLoaded", () => {
     toast.className = `${colors[type]} border px-5 py-3.5 rounded-xl shadow-2xl flex items-center gap-3 text-sm font-semibold translate-x-[120%] transition-transform duration-300 ease-out max-w-xs`;
     toast.innerHTML = `
       <i class="${icons[type]}"></i>
-      <span>${message}</span>
+      <span>${escapeHtml(message)}</span>
     `;
     toastContainer.appendChild(toast);
 
@@ -588,7 +569,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ============================================
-     17. INTEGRASI BACKEND API — TEST KONEKSI
+     16. INTEGRASI BACKEND API — TEST KONEKSI
      ============================================ */
   async function testKoneksi() {
     try {
@@ -602,7 +583,7 @@ document.addEventListener("DOMContentLoaded", () => {
   testKoneksi();
 
   /* ============================================
-     18. LOAD TESTIMONI DARI DATABASE
+     17. LOAD TESTIMONI DARI DATABASE
      ============================================ */
   async function loadTestimoni() {
     const container = document.querySelector("#testimoni .reveal.relative");
@@ -628,15 +609,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }`;
         slide.innerHTML = `
           <p class="text-slate-200 text-lg md:text-xl leading-relaxed italic relative z-10">
-            "${item.pesan}"
+            "${escapeHtml(item.pesan)}"
           </p>
           <div class="mt-6 flex items-center gap-3">
             <div class="w-11 h-11 rounded-full bg-brand-500 flex items-center justify-center font-bold text-slate-950">
-              ${item.inisial}
+              ${escapeHtml(item.inisial)}
             </div>
             <div>
-              <p class="font-bold text-white text-sm">${item.nama}</p>
-              <p class="text-xs text-slate-400">${item.peran}</p>
+              <p class="font-bold text-white text-sm">${escapeHtml(item.nama)}</p>
+              <p class="text-xs text-slate-400">${escapeHtml(item.peran)}</p>
             </div>
           </div>
         `;
@@ -663,7 +644,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ============================================
-     19. LOAD GALERI DARI DATABASE
+     18. LOAD GALERI DARI DATABASE
      ============================================ */
   async function loadGaleri() {
     const container = document.getElementById("galeriGrid");
@@ -682,13 +663,18 @@ document.addEventListener("DOMContentLoaded", () => {
       container.innerHTML = "";
 
       data.forEach((item) => {
+        const isUrl = item.file.startsWith("http");
+        const imgSrc = isUrl
+          ? escapeHtml(item.file)
+          : `Assets/${escapeHtml(item.file)}`;
+
         const card = document.createElement("div");
         card.className =
           "reveal gallery-item cursor-pointer overflow-hidden rounded-2xl border border-slate-800 group relative aspect-[4/5]";
         card.innerHTML = `
           <img 
-            src="${item.file.startsWith("http") ? item.file : `Assets/${item.file}`}" 
-            alt="${item.judul}" 
+            src="${imgSrc}" 
+            alt="${escapeHtml(item.judul)}" 
             class="w-full h-full object-cover group-hover:scale-110 transition duration-500"
             onerror="this.src='Assets/Logo.png'"
           />
@@ -712,7 +698,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ============================================
-     20. LOAD AGENDA DARI DATABASE
+     19. LOAD AGENDA DARI DATABASE
      ============================================ */
   async function loadAgenda() {
     const container = document.getElementById("listAgendaPublic");
@@ -734,7 +720,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Mapping warna per kategori
       const categoryColors = {
         pelatihan: {
           bg: "bg-cyan-950/80",
@@ -781,20 +766,20 @@ document.addEventListener("DOMContentLoaded", () => {
               <div class="flex-1 p-5 sm:p-6">
                 <div class="flex flex-wrap items-center gap-2 mb-3">
                   <span class="text-xs font-bold ${color.text} ${color.bg} border ${color.border} px-3 py-1 rounded-lg capitalize">
-                    ${item.kategori || "lainnya"}
+                    ${escapeHtml(item.kategori || "lainnya")}
                   </span>
                   <span class="text-xs text-slate-400 flex items-center gap-1">
                     <i class="fa-solid fa-location-dot"></i>
-                    ${item.lokasi}
+                    ${escapeHtml(item.lokasi)}
                   </span>
                 </div>
 
                 <h4 class="text-lg sm:text-xl font-bold text-white group-hover:text-brand-500 transition-colors mb-2">
-                  ${item.judul}
+                  ${escapeHtml(item.judul)}
                 </h4>
 
                 <p class="text-slate-400 text-sm leading-relaxed">
-                  ${item.deskripsi}
+                  ${escapeHtml(item.deskripsi)}
                 </p>
               </div>
             </div>
@@ -816,7 +801,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ============================================
-     21. LOAD STATISTIK DARI DATABASE
+     20. LOAD STATISTIK + COUNTER ANIMATION
      ============================================ */
   async function loadStatistik() {
     try {
@@ -842,16 +827,47 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       console.log("✅ Counter di-update dari statistik");
+
+      // Counter animation — pake angka yang udah bener
+      const counterObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const el = entry.target;
+              const target = +el.dataset.target;
+              const suffix = el.dataset.suffix || "";
+              let current = 0;
+              const step = target / 50;
+              const tick = () => {
+                current += step;
+                if (current < target) {
+                  el.textContent = Math.floor(current) + suffix;
+                  requestAnimationFrame(tick);
+                } else {
+                  el.textContent = target + suffix;
+                }
+              };
+              tick();
+              counterObserver.unobserve(el);
+            }
+          });
+        },
+        { threshold: 0.5 },
+      );
+      counters.forEach((c) => counterObserver.observe(c));
     } catch (err) {
       console.error("❌ Gagal load statistik:", err.message);
     }
   }
 
   /* ============================================
-     22. JALANKAN SEMUA
+     21. JALANKAN SEMUA
      ============================================ */
-  loadTestimoni();
-  loadGaleri();
-  loadAgenda();
-  loadStatistik();
+  // Statistik dulu — counter animation nunggu angka dari DB
+  (async () => {
+    await loadStatistik();
+    loadTestimoni();
+    loadGaleri();
+    loadAgenda();
+  })();
 });
